@@ -9,6 +9,8 @@
 
 **Играть онлайн:** https://yungspiderq.github.io/zarya-os/
 
+![ЗАРЯ OS — терминал](docs/preview.png)
+
 ## Что внутри
 
 Оболочка в духе Windows 11: экран загрузки, экран входа, рабочий стол,
