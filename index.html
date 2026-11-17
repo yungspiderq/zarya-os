@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru" data-theme="dark" data-accent="blue" data-wall="bloom">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#202020">
+  <title>ЗАРЯ OS — хакер-симулятор</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%230f6cbd'/%3E%3Cg fill='%234cc2ff'%3E%3Crect x='4.5' y='4.5' width='6' height='6' rx='1'/%3E%3Crect x='13.5' y='4.5' width='6' height='6' rx='1'/%3E%3Crect x='4.5' y='13.5' width='6' height='6' rx='1'/%3E%3Crect x='13.5' y='13.5' width='6' height='6' rx='1'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- загрузка -->
+  <div class="boot" id="boot">
+    <div class="boot-center">
+      <span class="boot-logo" data-icon="start"></span>
+      <div class="boot-brand">ЗАРЯ OS</div>
+      <div class="boot-spinner"></div>
+      <div class="boot-steps" id="bootSteps"></div>
+    </div>
+    <div class="boot-foot">виртуальная система · хакер-симулятор</div>
+  </div>
+
+  <!-- экран входа -->
+  <div class="lock" id="lock" hidden tabindex="0">
+    <div class="lock-clock" id="lockClock">--:--</div>
+    <div class="lock-date" id="lockDate"></div>
+    <div class="lock-user">
+      <span class="avatar avatar--lg">R</span>
+      <div class="lock-name">root</div>
+      <button type="button" class="btn btn--light" id="lockBtn">Войти</button>
+      <div class="lock-hint">нажми Enter</div>
+    </div>
+  </div>
+
+  <!-- оболочка -->
+  <div class="shell" id="shell" hidden>
+    <div class="wall" aria-hidden="true">
+      <span class="wall-petal p1"></span>
+      <span class="wall-petal p2"></span>
+      <span class="wall-petal p3"></span>
+      <span class="wall-petal p4"></span>
+      <span class="wall-petal p5"></span>
+      <span class="wall-core"></span>
+    </div>
+
+    <div class="desk" id="desk">
+      <div class="desk-icons" id="deskIcons"></div>
+      <div class="windows" id="windowsLayer"></div>
+      <div class="snap-preview" id="snapPreview" aria-hidden="true"></div>
+    </div>
+
+    <!-- панель задач -->
+    <footer class="taskbar">
+      <div class="tb-side"></div>
+
+      <div class="tb-center">
+        <button type="button" class="tb-btn tb-start" id="startBtn" title="Пуск" aria-label="Пуск">
+          <span data-icon="start"></span>
+        </button>
+        <div class="tb-pins" id="pins"></div>
+        <div class="tb-tasks" id="tasks"></div>
+      </div>
+
+      <div class="tb-side tb-right">
+        <div class="tray" id="trayGroup">
+          <button type="button" class="hud-chip" id="hudChip" title="След и баланс">
+            <span class="hud-trace"><i data-el="traceFill"></i></span>
+            <b data-el="traceVal">0%</b>
+            <span class="hud-sep"></span>
+            <b data-el="money">0 ₡</b>
+          </button>
+
+          <span class="tray-icons" aria-hidden="true">
+            <span class="tray-glyph" data-icon="wifi"></span>
+            <span class="tray-glyph" data-icon="volume"></span>
+            <span class="tray-glyph" data-icon="battery"></span>
+          </span>
+
+          <button type="button" class="tray-clock" id="trayClock" title="Быстрые настройки">
+            <span id="clockTime">--:--</span>
+            <span id="clockDate">--.--.----</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- меню «Пуск» -->
+    <div class="startmenu" id="startMenu" hidden>
+      <div class="start-search">
+        <span class="start-search-ico" data-icon="search"></span>
+        <input id="startSearch" type="text" placeholder="Поиск приложений, файлов" autocomplete="off" spellcheck="false" aria-label="Поиск">
+      </div>
+
+      <div class="start-row">
+        <h3>Закреплено</h3>
+        <span class="muted">8 приложений</span>
+      </div>
+      <div class="start-grid" id="startGrid"></div>
+
+      <div class="start-row">
+        <h3>Рекомендуем</h3>
+      </div>
+      <div class="start-rec" id="startRec"></div>
+
+      <div class="start-foot">
+        <div class="start-user">
+          <span class="avatar">R</span>
+          <span>root</span>
+        </div>
+        <button type="button" class="btn btn--icon" id="powerBtn" title="Завершить сессию" aria-label="Завершить сессию">
+          <span data-icon="power"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- быстрые настройки -->
+    <div class="quick" id="quickPanel" hidden>
+      <div class="qs-grid">
+        <button type="button" class="qs-tile" data-qs="wifi">
+          <span class="qs-ico" data-icon="wifi"></span><span>Wi-Fi</span>
+        </button>
+        <button type="button" class="qs-tile" data-qs="bluetooth">
+          <span class="qs-ico" data-icon="bluetooth"></span><span>Bluetooth</span>
+        </button>
+        <button type="button" class="qs-tile" data-qs="plane">
+          <span class="qs-ico" data-icon="plane"></span><span>В самолёте</span>
+        </button>
+        <button type="button" class="qs-tile" data-qs="eco">
+          <span class="qs-ico" data-icon="battery"></span><span>Экономия</span>
+        </button>
+      </div>
+
+      <div class="qs-slider">
+        <span class="qs-ico" data-icon="sun"></span>
+        <input type="range" id="qsBright" min="20" max="100" value="100" aria-label="Яркость">
+        <b id="qsBrightVal">100%</b>
+      </div>
+
+      <div class="qs-slider">
+        <span class="qs-ico" data-icon="volume"></span>
+        <input type="range" id="qsVol" min="0" max="100" value="60" aria-label="Громкость">
+        <b id="qsVolVal">60%</b>
+      </div>
+
+      <div class="qs-foot">
+        <button type="button" class="qs-theme" id="qsTheme">Светлая тема</button>
+        <button type="button" class="btn btn--icon" id="qsSettings" title="Все настройки" aria-label="Все настройки">
+          <span data-icon="settings-app"></span>
+        </button>
+      </div>
+    </div>
+
+    <div id="overlayLayer"></div>
+    <div id="dialogLayer"></div>
+    <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/fs.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/wm.js"></script>
+  <script src="js/apps.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    /* подстановка иконок в статичную разметку */
+    document.querySelectorAll('[data-icon]').forEach(function (el) {
+      var key = el.getAttribute('data-icon');
+      var set = key === 'settings-app' ? window.APPICONS.settings : window.ICONS[key];
+      el.innerHTML = set || '';
+    });
+  </script>
+</body>
+</html>
