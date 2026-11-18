@@ -1,7 +1,7 @@
 # ЗАРЯ OS — хакер-симулятор в оболочке Windows 11
 
 [![Демо](https://img.shields.io/badge/играть-онлайн-2f9fe0?style=flat-square)](https://yungspiderq.github.io/zarya-os/)
-[![Версия](https://img.shields.io/badge/версия-1.2.0-6ccb5f?style=flat-square)](CHANGELOG.md)
+[![Версия](https://img.shields.io/badge/версия-1.3.0-6ccb5f?style=flat-square)](CHANGELOG.md)
 [![Лицензия](https://img.shields.io/badge/лицензия-MIT-ffa04d?style=flat-square)](LICENSE)
 
 Маленькая «операционная система» на HTML + CSS + чистом JavaScript.
@@ -15,6 +15,10 @@
   <img src="docs/net.png" width="49%" alt="Сеть: карта узлов">
   <img src="docs/shop.png" width="49%" alt="Магазин: иллюстрации апгрейдов">
 </p>
+
+## Новое в 1.3 «Апгрейд»
+
+Симулятор виртуального ПК с апгрейдами CPU, GPU и ОЗУ, а также две мини-игры в «Аркаде». Подробности: [примечания к версии](RELEASE_NOTES_1.3.md).
 
 ## Что внутри
 
