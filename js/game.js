@@ -514,7 +514,8 @@
       servicePaid: [],
       buildPaid: [],
       companyPaid: [],
-      companyAwardsPaid: []
+      companyAwardsPaid: [],
+      proPaid: []
     };
   }
 
@@ -677,6 +678,19 @@
       st.earned += amount;
       save();
       return { ok: true, reward: amount, msg: '+' + amount + ' ₡ за контракт мастерской.' };
+    },
+    awardProContract: function (id, amount) {
+      if (typeof id !== 'string' || !/^pro-[0-9]{6}$/.test(id) ||
+          !Number.isSafeInteger(amount) || amount < 1 || amount > 1200) {
+        return { ok: false, msg: 'Некорректная выплата сложного заказа.' };
+      }
+      if (!Array.isArray(st.proPaid)) st.proPaid = [];
+      if (st.proPaid.includes(id)) return { ok: false, alreadyPaid: true, msg: 'Заказ уже оплачен.' };
+      st.proPaid.push(id);
+      st.money += amount;
+      st.earned += amount;
+      save();
+      return { ok: true, reward: amount, msg: 'Прибыль мастерской: +' + amount + ' ₡.' };
     },
     awardCompanyAchievement: function (id, amount) {
       if (typeof id !== 'string' || !/^ach-[a-z0-9-]{2,40}$/.test(id) ||
