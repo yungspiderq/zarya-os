@@ -1091,7 +1091,7 @@
           if (i < lvl) p.className = 'on';
           pips.appendChild(p);
         }
-        card.querySelector('.cost').textContent = maxed ? 'максимум' : fmt(cost) + ' ₡';
+        card.querySelector('.cost').textContent = maxed ? 'максимум' : (item.id === 'gpu' || item.id === 'ram' ? fmt(cost) + ' арк. кр.' : fmt(cost) + ' ₡');
         const btn = card.querySelector('button');
         btn.textContent = maxed ? 'Установлено' : 'Улучшить';
         btn.disabled = maxed;
@@ -1280,7 +1280,7 @@
         '<div class="app about">' +
         '  <div class="about-head">' +
         '    <span class="about-logo">' + window.ICONS.start + '</span>' +
-        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.2 «Холодный след» · сборка 20261118</p></div>' +
+        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.3 «Апгрейд» · сборка 20261118</p></div>' +
         '  </div>' +
         '  <div class="about-grid">' +
         '    <div><span>Процессор</span><b data-el="cpu">1 ядро</b></div>' +
