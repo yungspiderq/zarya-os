@@ -1,7 +1,7 @@
 # ЗАРЯ OS — хакер-симулятор в оболочке Windows 11
 
 [![Демо](https://img.shields.io/badge/играть-онлайн-2f9fe0?style=flat-square)](https://yungspiderq.github.io/zarya-os/)
-[![Версия](https://img.shields.io/badge/версия-1.5.0-6ccb5f?style=flat-square)](CHANGELOG.md)
+[![Версия](https://img.shields.io/badge/версия-1.5.1-6ccb5f?style=flat-square)](CHANGELOG.md)
 [![Лицензия](https://img.shields.io/badge/лицензия-MIT-ffa04d?style=flat-square)](LICENSE)
 
 Маленькая «операционная система» на HTML + CSS + чистом JavaScript.
@@ -15,6 +15,10 @@
   <img src="docs/net.png" width="49%" alt="Сеть: карта узлов">
   <img src="docs/shop.png" width="49%" alt="Магазин: иллюстрации апгрейдов">
 </p>
+
+## Исправление 1.5.1
+
+В «Магазине комплектующих» исправлена вертикальная прокрутка: колесо мыши, прокрутка с клавиатуры и полоса прокрутки позволяют просмотреть все товары и нижние кнопки даже при небольшом размере окна. Вкладки категорий остаются видимыми во время прокрутки.
 
 ## Новое в 1.5 «Железная мастерская»
 
