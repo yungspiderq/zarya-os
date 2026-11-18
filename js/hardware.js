@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const G = window.Game;
-  G.version = '1.6.0';
+  G.version = '1.7.0';
 
   const KEY = 'zarya.components.v2';
   const OLD_KEY = 'zarya.hardware.v1';
@@ -198,6 +198,37 @@
     return { ok: true, msg: 'Совместимо с установленным компьютером.' };
   }
   G.partCompatibility = compatibility;
+  // Evaluate a client PC without changing the player's installed hardware.
+  G.simulatePC = function (ids) {
+    const kinds = ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd'];
+    const selected = {};
+    const errors = [];
+    kinds.forEach(function (type) {
+      const p = ids && part(ids[type]);
+      if (!p || p.type !== type) errors.push('Выбери совместимую деталь: ' + type.toUpperCase());
+      else selected[type] = p;
+    });
+    if (errors.length) return { ok: false, errors: errors };
+    const cpu = selected.cpu, gpu = selected.gpu, ram = selected.ram, board = selected.board;
+    const psu = selected.psu, drive = selected.ssd;
+    const ramGb = [2, 4, 8, 16, 32][ram.power] || 2;
+    const need = powerNeeded(cpu, gpu);
+    const fps = Math.min(120, Math.round(12 + gpu.power * 22 + cpu.power * 4 + ram.power * 3));
+    const boot = Math.max(5, Math.round(48 - 9 * drive.power - cpu.power * 1.2));
+    if (cpu.socket !== board.socket) errors.push('CPU и плата имеют разные сокеты');
+    if (ramGb > board.maxRam) errors.push('Материнская плата не поддерживает выбранный объём ОЗУ');
+    if (drive.interface === 'M.2' && !board.m2) errors.push('Накопителю NVMe нужен слот M.2');
+    if (psu.watts < need) errors.push('Недостаточно мощности БП: нужно ' + need + ' Вт, установлено ' + psu.watts + ' Вт');
+    return {
+      ok: errors.length === 0, errors: errors,
+      parts: selected,
+      fps: fps, ramGb: ramGb, bootSeconds: boot,
+      storageSpeed: drive.mbps,
+      requiredWatts: need, suppliedWatts: psu.watts,
+      cpuLevel: cpu.power, gpuLevel: gpu.power, ramLevel: ram.power,
+      diskLevel: drive.power
+    };
+  };
   G.systemHealth = function () {
     const cpu = G.installedPart('cpu');
     const gpu = G.installedPart('gpu');
