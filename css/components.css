@@ -1,5 +1,28 @@
 /* ZARYA OS 1.4 — магазин физических комплектующих и мастерская сборки ПК */
 .parts-app, .work-app { padding: 22px; min-height: 100%; }
+/* The window body clips its children. Give the store its own scroll viewport. */
+.parts-app {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+/* Keep the product catalog at its natural height so it can actually scroll. */
+.parts-app .part-products,
+.parts-app .part-categories,
+.parts-app .parts-footnote,
+.parts-app .pc-actions {
+  flex-shrink: 0;
+}
+.parts-app .part-categories {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-top: 10px;
+  background: var(--win-body);
+}
 .parts-app .app-head, .work-app .app-head { margin-bottom: 20px; }
 .parts-wallet { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 3px; white-space: nowrap; }
 .parts-wallet b { font-size: 16px; color: var(--text); }
