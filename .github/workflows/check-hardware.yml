@@ -31,6 +31,8 @@ jobs:
           for file in js/*.js; do node --check "$file"; done
       - name: Run virtual PC tests
         run: node tests/hardware.test.cjs
+      - name: Verify component shop scrollbar
+        run: node tests/shop-scroll.test.cjs
       - name: Check page integrations
         run: |
-          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css"])if(!x.includes(f+"?v=1.5.0"))throw Error("Missing cache-safe asset: "+f)'
+          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css"])if(!x.includes(f+"?v=1.5.1"))throw Error("Missing cache-safe asset: "+f)'
