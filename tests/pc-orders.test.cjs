@@ -52,7 +52,7 @@ const valid=[
 const actions=['board','core','gpu','cables','boot','deliver'];
 (function testCatalogueAndPerformance() {
   const {G}=boot();
-  assert.equal(G.version,'2.1.0');
+  assert.equal(G.version,'2.2.0');
   assert.equal(G.buildOrders().length,8);
   assert.equal(G.buildOrders()[0].status,'available');
   assert.equal(G.buildOrders()[1].status,'available');
