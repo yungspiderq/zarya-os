@@ -34,7 +34,11 @@ try:
         page.goto(url, wait_until="load")
         page.wait_for_function("typeof window.WM !== 'undefined' && " +
                                "typeof window.Game.companyJobs === 'function' && " +
-                               "typeof window.SaveCenterCore.makeBackup === 'function'")
+                               "typeof window.SaveCenterCore.makeBackup === 'function' && " +
+                               "typeof window.Game.proOffers === 'function'")
+        assert page.evaluate("localStorage.getItem('zarya.reset.v2.1')") == "1"
+        assert page.evaluate("window.Game.money()") == 0
+        assert page.evaluate("window.Game.antiCheatStatus().protected") is True
         page.locator("#lockBtn").wait_for(state="visible", timeout=20000)
         page.locator("#lockBtn").click()
         page.wait_for_selector("#shell:not([hidden])", timeout=10000)
@@ -53,7 +57,19 @@ try:
         page.evaluate("window.Game.companyCancel()")
         page.locator('[data-hq-tab="achievements"]').click()
         assert page.locator(".hq-ach-card").count() == 12
-        # A brand-new profile does not write zarya.game.v1 until the first game action.
+        page.evaluate("(window.WM.open('pro-workshop'), true)")
+        page.wait_for_selector(".pr-app")
+        assert page.locator(".pr-ticket").count() == 3
+        page.locator(".pr-ticket").first.click()
+        page.locator(".pr-body > button").first.click()
+        assert page.locator(".pr-test").count() == 8
+        page.locator(".pr-test button").first.click()
+        assert page.locator(".pr-test-report").count() == 1
+        page.screenshot(path=str(SCREENSHOTS / "professional-workshop.png"), full_page=True)
+        page.evaluate("window.Game.proAbandon()")
+        page.evaluate("""localStorage.setItem('zarya.settings.v2',
+                           JSON.stringify({theme:'dark',accent:'blue'}))""")
+        # A brand-new profile creates a main-game save before exporting an archive.
         # Persist a harmless zero-cost action to exercise a real game backup.
         assert page.evaluate("window.Game.spendFunds(0).ok")
         page.evaluate("(window.WM.open('save-center'), true)")
@@ -70,9 +86,21 @@ try:
             assert content["format"] == "zarya-os-save"
             assert "zarya.game.v1" in content["data"]
             assert "zarya.company.v1" in content["data"]
+            assert "zarya.pro-workshop.v1" in content["data"]
             page.locator('[data-save="file"]').set_input_files(str(exported))
             page.wait_for_selector(".sv-preview")
             assert page.locator('[data-save="restore"]').is_enabled()
+            edited = json.loads(exported.read_text(encoding="utf-8"))
+            inner = json.loads(edited["data"]["zarya.game.v1"])
+            inner["money"] = 999999
+            edited["data"]["zarya.game.v1"] = json.dumps(inner)
+            assert page.evaluate("""blob => {
+                const checked=window.SaveCenterCore.validate(blob);
+                if(!checked.ok) return false;
+                const balance=window.Game.money();
+                return window.SaveCenterCore.restore(checked).ok &&
+                    window.Game.money()===balance;
+            }""", json.dumps(edited))
             assert page.evaluate(
                 "window.SaveCenterCore.validate(window.SaveCenterCore.makeBackup()).ok"
             )
@@ -82,4 +110,4 @@ try:
 finally:
     httpd.shutdown()
     httpd.server_close()
-print("Zarya OS 2.0 browser smoke: company, contracts, achievements and backup UI passed.")
+print("Zarya OS 2.1 browser smoke: company, contracts, achievements and backup UI passed.")

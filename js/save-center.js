@@ -1,11 +1,11 @@
-/* ZARYA OS 2.0 — local, offline-only save backup and restore. */
+/* ZARYA OS 2.1 — archive export with settings-only import to protect game economy. */
 (function () {
   'use strict';
   const KEYS = [
     'zarya.seen','zarya.settings.v2','zarya.fs.v3','zarya.game.v1',
     'zarya.hardware.v1','zarya.components.v2',
     'zarya.service.v1','zarya.pc-orders.v1','zarya.cooling.v1',
-    'zarya.market.v1','zarya.company.v1'
+    'zarya.market.v1','zarya.company.v1','zarya.pro-workshop.v1'
   ];
   const MAX_FILE = 3 * 1024 * 1024;
   const MAX_VALUE = 2 * 1024 * 1024;
@@ -28,7 +28,7 @@
         if (raw !== null) records[key] = raw;
       });
       const backup = {
-        format: FORMAT, schema: 1, version: '2.0.0',
+        format: FORMAT, schema: 1, version: '2.1.0',
         exportedAt: new Date().toISOString(), data: records
       };
       const serialized = JSON.stringify(backup, null, 2);
@@ -46,7 +46,7 @@
       if (!backup || typeof backup !== 'object' || Array.isArray(backup) ||
           backup.format !== FORMAT || backup.schema !== 1 ||
           !backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data)) {
-        return { ok: false, msg: 'Файл не является резервной копией Zarya OS 2.0.' };
+        return { ok: false, msg: 'Файл не является резервной копией Zarya OS.' };
       }
       const keys = Object.keys(backup.data);
       if (!keys.length) return { ok: false, msg: 'В резервной копии нет данных.' };
@@ -77,6 +77,7 @@
           'zarya.game.v1': ['v', 1],
           'zarya.components.v2': ['v', 2],
           'zarya.company.v1': ['v', 1],
+          'zarya.pro-workshop.v1': ['v', 1],
           'zarya.market.v1': ['v', 1],
           'zarya.service.v1': ['version', 1],
           'zarya.pc-orders.v1': ['version', 1],
@@ -91,6 +92,7 @@
       }
       return {
         ok: true, data: values, count: keys.length, size: total,
+        restorable: typeof values['zarya.settings.v2'] === 'string',
         exportedAt: typeof backup.exportedAt === 'string' ? backup.exportedAt : '',
         version: typeof backup.version === 'string' ? backup.version : '?',
         msg: 'Найдено ' + keys.length + ' разделов сохранения.'
@@ -98,26 +100,25 @@
     },
     restore: function (validated) {
       if (!validated || validated.ok !== true || !validated.data ||
-          typeof validated.data !== 'object') return { ok: false, msg: 'Сначала проверь файл.' };
-      const before = Object.create(null);
+          typeof validated.data !== 'object') return { ok: false, msg: 'Сначала проверь архив.' };
+      // JSON money, achievements, missions and hardware never reach persistent storage.
+      // A local file is not a server-authenticated source of funds.
+      const raw=validated.data['zarya.settings.v2'];
+      if (typeof raw !== 'string') return {
+        ok: false, msg: 'В этом архиве нет настроек. Игровой прогресс импортировать запрещено.'
+      };
+      let parsed;
+      try { parsed=JSON.parse(raw); } catch(e) {
+        return { ok: false, msg: 'Повреждён раздел настроек.' };
+      }
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return { ok: false, msg: 'Формат настроек не поддерживается.' };
+      }
       try {
-        KEYS.forEach(key => { before[key] = localStorage.getItem(key); });
-        // All writes are confined to Zarya OS keys, never unrelated local browser data.
-        KEYS.forEach(function (key) {
-          if (Object.prototype.hasOwnProperty.call(validated.data, key))
-            localStorage.setItem(key, validated.data[key]);
-          else localStorage.removeItem(key);
-        });
-        return { ok: true, msg: 'Данные восстановлены. Перезапусти виртуальную ОС.' };
+        localStorage.setItem('zarya.settings.v2',raw);
+        return { ok: true, msg: 'Настройки импортированы. Деньги, детали и достижения не изменены.' };
       } catch (e) {
-        // Roll back as much as storage permits, keeping an interrupted restore from destroying progress.
-        try {
-          KEYS.forEach(function (key) {
-            if (before[key] === null || before[key] === undefined) localStorage.removeItem(key);
-            else localStorage.setItem(key, before[key]);
-          });
-        } catch (rollbackError) {}
-        return { ok: false, msg: 'Не удалось записать сохранение. Свободное место может быть ограничено.' };
+        return { ok: false, msg: 'Не удалось сохранить настройки.' };
       }
     }
   };
@@ -172,7 +173,7 @@
     function preview(text, name) {
       const validated = S.validate(text);
       picked = validated.ok ? validated : null;
-      root.querySelector('[data-save="restore"]').disabled = !validated.ok;
+      root.querySelector('[data-save="restore"]').disabled = !validated.restorable;
       root.querySelector('[data-save="preview"]').replaceChildren();
       if (validated.ok) {
         const content = el('<div class="sv-preview"><strong></strong><span></span><small></small></div>');
@@ -183,26 +184,30 @@
           ' · Версия игры: ' + validated.version;
         root.querySelector('[data-save="preview"]').appendChild(content);
       }
-      status(validated.msg, !validated.ok);
+      status(validated.ok
+        ? validated.msg + (validated.restorable
+            ? ' Можно восстановить только оформление и настройки.'
+            : ' Игровой прогресс импортировать нельзя.')
+        : validated.msg, !validated.ok);
     }
     function mount(api) {
       root = el('<div class="app sv-app"><header class="app-head"><div><h2>Центр сохранений</h2>' +
-        '<p class="muted">Локальные резервные копии всей Zarya OS 2.0</p></div>' +
+        '<p class="muted">Архив прогресса и безопасный импорт настроек · версия 2.1</p></div>' +
         '<div class="sv-counter"><strong data-save="count">0</strong><span>разделов</span></div></header>' +
         '<section class="sv-hero"><div class="sv-disk-art"><span>2.0</span></div><div>' +
-        '<h3>Сохрани весь игровой прогресс</h3>' +
+        '<h3>Экспортируй архив игрового прогресса</h3>' +
         '<p>Деньги, инвентарь, задания, достижения, состояние компьютера, настройки и записи. ' +
-        'Файл остаётся на твоём устройстве — никакого облака или сервера.</p>' +
+        'Файл остаётся на твоём устройстве. Ради честной экономики импорт игровых данных отключён.</p>' +
         '<span>Объём данных: <b data-save="size"></b></span></div></section>' +
         '<div class="sv-actions"><section><h3>Создать резервную копию</h3>' +
         '<p>Экспортирует все известные разделы в один JSON-файл.</p>' +
         '<button type="button" class="btn btn--primary" data-save="export">Скачать архив</button></section>' +
-        '<section><h3>Восстановить сохранение</h3>' +
-        '<p>Выбери ранее созданный JSON-файл. Содержимое будет проверено до восстановления.</p>' +
+        '<section><h3>Импортировать настройки</h3>' +
+        '<p>Выбери JSON-архив. Для защиты экономики можно восстановить только настройки — не деньги, детали и достижения.</p>' +
         '<input type="file" accept=".json,application/json" data-save="file">' +
         '<div data-save="preview"></div><button type="button" class="btn" data-save="restore" disabled>' +
-        'Восстановить из файла</button></section></div>' +
-        '<p class="sv-warning">Восстановление заменяет текущий игровой прогресс и перезагружает страницу. ' +
+        'Восстановить настройки</button></section></div>' +
+        '<p class="sv-warning">Импорт не меняет деньги или достижения. Старые игровые сохранения восстановить нельзя. ' +
         'Сначала сделай резервную копию нынешнего сохранения.</p>' +
         '<p class="sv-status" data-save="status" role="status">Готово к работе.</p>' +
         '<section class="sv-saved-keys"><h3>Разделы, которые попадут в архив</h3>' +
@@ -222,9 +227,9 @@
       });
       root.querySelector('[data-save="restore"]').addEventListener('click', function () {
         if (!picked) return;
-        window.UI.confirm('Заменить сохранение?',
-          'Текущие деньги, компания, инвентарь и прогресс будут заменены данными из файла. Продолжить?',
-          'Восстановить').then(function(ok) {
+        window.UI.confirm('Заменить настройки?',
+          'Только настройки интерфейса будут заменены данными архива. Деньги, компания и инвентарь останутся без изменений. Продолжить?',
+          'Импортировать').then(function(ok) {
           if (!ok) return;
           const result = S.restore(picked);
           status(result.msg, !result.ok);
