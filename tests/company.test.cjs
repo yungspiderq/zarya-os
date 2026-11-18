@@ -1,4 +1,4 @@
-/* ZARYA OS 2.0 company regression suite; no dependencies or DOM. */
+/* ZARYA OS 2.1 company regression suite; no dependencies or DOM. */
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -85,7 +85,7 @@ function complete(G,id){
 }
 (function testStartAndUpgradeEconomy(){
   const a=boot(),G=a.G;
-  assert.equal(G.version,'2.0.0');
+  assert.equal(G.version,'2.1.0');
   assert.equal(G.companyJobs().length,3);
   assert.equal(G.companyJobs()[0].id,'co-000001');
   assert.equal(G.companyJobs()[0].type,'diagnose');
@@ -180,4 +180,4 @@ function complete(G,id){
   assert.equal(session.G.companyJobs().length,3);
   assert.equal(session.resetCount(),1);
 })();
-console.log('Zarya OS 2.0: company queues, ranks, building, upgrades, payouts and saves passed.');
+console.log('Zarya OS 2.1: company queues, ranks, building, upgrades, payouts and saves passed.');
