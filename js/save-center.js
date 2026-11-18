@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const KEYS = [
-    'zarya.settings.v2','zarya.fs.v3','zarya.game.v1',
+    'zarya.seen','zarya.settings.v2','zarya.fs.v3','zarya.game.v1',
     'zarya.hardware.v1','zarya.components.v2',
     'zarya.service.v1','zarya.pc-orders.v1','zarya.cooling.v1',
     'zarya.market.v1','zarya.company.v1'
@@ -57,6 +57,12 @@
       let total = 0;
       for (const key of keys) {
         const value = backup.data[key];
+        if (key === 'zarya.seen') {
+          if (value !== '0' && value !== '1') return { ok: false, msg: 'Повреждённый флаг приветствия.' };
+          values[key] = value;
+          total += 1;
+          continue;
+        }
         if (typeof value !== 'string' || value.length > MAX_VALUE || value.length < 2) {
           return { ok: false, msg: 'Повреждённый или слишком большой блок: ' + key };
         }
