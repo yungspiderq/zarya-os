@@ -517,7 +517,8 @@
       buildPaid: [],
       companyPaid: [],
       companyAwardsPaid: [],
-      proPaid: []
+      proPaid: [],
+      simulationPaid: []
     };
   }
 
@@ -545,10 +546,12 @@
       ['companyAwardsPaid', /^ach-[a-z0-9-]{2,40}$/],
       ['proPaid', /^pro-[0-9]{6}$/],
       ['buildPaid', /^build-[0-9]{2}$/],
-      ['servicePaid', /^svc-[0-9]{2}$/]
+      ['servicePaid', /^svc-[0-9]{2}$/],
+      ['simulationPaid', /^sim-0[1-8]$/]
     ];
     return groups.every(function (entry) {
       const ids = data[entry[0]];
+      if (entry[0] === 'simulationPaid' && ids === undefined) return true; // 2.1 profile migration
       return Array.isArray(ids) && ids.length <= 100000 &&
         new Set(ids).size === ids.length &&
         ids.every(id => typeof id === 'string' && entry[1].test(id));
@@ -749,6 +752,20 @@
       st.earned += amount;
       save();
       return { ok: true, reward: amount, msg: '+' + amount + ' ₡ за контракт мастерской.' };
+    },
+    awardSimulationCase: function (id, amount) {
+      if (typeof id !== 'string' || !/^sim-0[1-8]$/.test(id) ||
+          !Number.isSafeInteger(amount) || amount < 170 || amount > 765) {
+        return { ok: false, msg: 'Некорректная выплата лабораторной операции.' };
+      }
+      if (!Array.isArray(st.simulationPaid)) st.simulationPaid = [];
+      if (st.simulationPaid.includes(id))
+        return { ok: false, alreadyPaid: true, msg: 'Операция уже оплачена.' };
+      st.simulationPaid.push(id);
+      st.money += amount;
+      st.earned += amount;
+      save();
+      return { ok: true, msg: '+' + amount + ' ₡ за расследование.' };
     },
     awardProContract: function (id, amount) {
       if (typeof id !== 'string' || !/^pro-[0-9]{6}$/.test(id) ||
