@@ -1,10 +1,11 @@
-name: Validate Zarya OS 2.2 simulated network operations
+name: Validate Zarya OS 2.2.1 server-verified security
 
 on:
   pull_request:
     paths:
       - 'js/**'
       - 'css/**'
+      - 'server/**'
       - 'index.html'
       - 'tests/**'
       - '.github/workflows/check-hardware.yml'
@@ -12,6 +13,7 @@ on:
     branches: [main]
     paths:
       - 'js/**'
+      - 'server/**'
       - 'tests/**'
       - '.github/workflows/check-hardware.yml'
 
@@ -51,9 +53,11 @@ jobs:
         run: node tests/integrity.test.cjs
       - name: Test eight evidence-based simulated network investigations
         run: node tests/operations.test.cjs
+      - name: Test server-authoritative wallet, ledger, cookies and anti-forgery
+        run: node tests/verified-server.test.cjs
       - name: Check page integrations
         run: |
-          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css","js/service-center.js","css/service-center.css","js/pc-orders.js","css/pc-orders.css","js/cooling.js","css/cooling.css","js/marketplace.js","css/marketplace.css","js/company.js","js/company-app.js","css/company.css","js/save-center.js","css/save-center.css","js/season-reset.js","js/pro-workshop.js","js/pro-workshop-app.js","css/pro-workshop.css","js/operations.js","js/operations-app.js","css/operations.css"])if(!x.includes(f+"?v=2.2.0"))throw Error("Missing cache-safe asset: "+f)'
+          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css","js/service-center.js","css/service-center.css","js/pc-orders.js","css/pc-orders.css","js/cooling.js","css/cooling.css","js/marketplace.js","css/marketplace.css","js/company.js","js/company-app.js","css/company.css","js/save-center.js","css/save-center.css","js/season-reset.js","js/pro-workshop.js","js/pro-workshop-app.js","css/pro-workshop.css","js/operations.js","js/operations-app.js","css/operations.css","js/verified-lab.js","css/verified-lab.css"])if(!x.includes(f+"?v=2.2.1"))throw Error("Missing cache-safe asset: "+f)'
 
   browser-smoke:
     needs: test
@@ -68,11 +72,13 @@ jobs:
           python -m pip install playwright==1.55.0
           python -m playwright install chromium
       - name: Run full UI smoke in Chromium
-        run: python tests/browser-smoke.py
+        run: |
+          python tests/browser-smoke.py
+          python tests/verified-browser-smoke.py
       - name: Keep browser screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zarya-2.2-ui-screenshots
+          name: zarya-2.2.1-ui-screenshots
           path: screenshots-2.0/
           if-no-files-found: ignore

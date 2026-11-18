@@ -28,7 +28,7 @@
         if (raw !== null) records[key] = raw;
       });
       const backup = {
-        format: FORMAT, schema: 1, version: '2.2.0',
+        format: FORMAT, schema: 1, version: '2.2.1',
         exportedAt: new Date().toISOString(), data: records
       };
       const serialized = JSON.stringify(backup, null, 2);

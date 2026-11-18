@@ -85,7 +85,7 @@ function complete(G,id){
 }
 (function testStartAndUpgradeEconomy(){
   const a=boot(),G=a.G;
-  assert.equal(G.version,'2.2.0');
+  assert.equal(G.version,'2.2.1');
   assert.equal(G.companyJobs().length,3);
   assert.equal(G.companyJobs()[0].id,'co-000001');
   assert.equal(G.companyJobs()[0].type,'diagnose');
