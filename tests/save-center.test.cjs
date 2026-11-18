@@ -72,7 +72,7 @@ const initial=new Map([
   assert.equal(target.Core.restore(payload).ok,true);
   assert.equal(data.get('zarya.game.v1'),baseline.get('zarya.game.v1'));
   assert.equal(data.has('zarya.market.v1'),false,'old game sections not present in backup are replaced');
-  assert.equal(data.get('not-zarya-account'),baseline.get('not-zarya-account'));
+  assert.equal(data.get('not-zarya-account'),JSON.stringify({secret:'keep this'}), 'unrelated browser data stays untouched');
   assert.equal(target.Core.getSummary().count,5);
 })();
 (function testWriteFailureRollsBack(){
@@ -83,7 +83,7 @@ const initial=new Map([
     ['zarya.company.v1',JSON.stringify({v:1,name:'Something Else'})]
   ])});
   const payload=sourceBackup.Core.validate(sourceBackup.Core.makeBackup());
-  const target=boot({data,failKey:'zarya.components.v2'});
+  const target=boot({data,failKey:'zarya.game.v1'});
   assert.equal(target.Core.restore(payload).ok,false);
   for(const [key,value] of original)assert.equal(data.get(key),value,'rollback: '+key);
 })();
