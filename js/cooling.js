@@ -283,7 +283,10 @@
     }
     function mount(openApi) {
       api = openApi;
-      cleaned = new Set(); stage = -1;
+      cleaned = new Set();
+      if (target && G.partInventory('cooler').some(function (p) { return p.id === target; })) {
+        mode = 'swap'; stage = 0;
+      } else { target = null; stage = -1; }
       root = node('<div class="app cool-app"><div class="app-head"><div><h2>Охлаждение ПК</h2>' +
         '<p class="muted">Игровые температуры · чистка пыли · замена кулера</p></div>' +
         '<button type="button" class="btn" data-cool="shop">Магазин</button></div>' +
