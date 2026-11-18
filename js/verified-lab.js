@@ -131,6 +131,25 @@
       });
       parent.appendChild(events);
     }
+    function verifiedShop(parent){
+      parent.appendChild(heading('Магазин подтверждённых сертификатов',
+        'Это косметические знаки отличия. Их покупка и стоимость проверяются сервером, а не браузером.'));
+      const grid=elem('<div class="vl-shop"></div>');
+      (session.catalog||[]).forEach(item=>{
+        const owned=(session.owned||[]).includes(item.id);
+        const card=elem('<section class="vl-shop-card"><span class="vl-shop-symbol"></span>' +
+          '<h4></h4><p></p><button type="button" class="btn"></button></section>');
+        card.querySelector('.vl-shop-symbol').textContent=item.id==='gold'?'★':item.id==='silver'?'✦':'◇';
+        card.querySelector('h4').textContent=item.name;
+        card.querySelector('p').textContent=owned?'Приобретено на сервере':'Цена: '+format(item.price);
+        const b=card.querySelector('button');
+        b.textContent=owned?'Получено':'Купить';
+        b.disabled=owned||busy||session.verifiedBalance<item.price;
+        b.addEventListener('click',()=>action('purchase',{id:item.id}));
+        grid.appendChild(card);
+      });
+      parent.appendChild(grid);
+    }
     function cases(parent){
       parent.appendChild(heading('Операции с серверной проверкой',
         'Решение вычисляется и проверяется на сервере. В отчёте нельзя указать сумму выплаты.'));
@@ -250,6 +269,7 @@
       }
       summary(body);
       cases(body);
+      verifiedShop(body);
       eventList(body);
       body.scrollTop=scroll;
     }
