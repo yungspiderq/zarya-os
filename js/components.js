@@ -117,7 +117,7 @@
     function mount(openApi) {
       api = openApi;
       root = el(
-        '<div class="app parts-app"><div class="app-head"><div><h2>Магазин комплектующих</h2>' +
+        '<div class="app parts-app" tabindex="0" role="region" aria-label="Магазин комплектующих"><div class="app-head"><div><h2>Магазин комплектующих</h2>' +
         '<p class="muted">Выбери конкретную модель. Купленная деталь попадает в инвентарь.</p></div>' +
         '<div class="parts-wallet"><b data-store="money"></b><small data-store="credits"></small></div></div>' +
         '<nav class="part-categories" aria-label="Разделы магазина">' +
