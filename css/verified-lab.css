@@ -71,3 +71,12 @@
  .vl-disconnected{padding:13px;}
  .vl-head h2{font-size:19px;}
 }
+
+.vl-shop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:15px;}
+.vl-shop-card{min-width:0;display:flex;flex-direction:column;gap:9px;padding:15px;border:1px solid var(--stroke-2);border-radius:10px;background:var(--card);}
+.vl-shop-symbol{width:44px;height:44px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--accent) 60%,var(--stroke));border-radius:11px;color:var(--accent);font-size:24px;}
+.vl-shop-card h4{font-size:13px;line-height:1.5;overflow-wrap:anywhere;}
+.vl-shop-card p{font-size:11px;color:var(--text-2);line-height:1.4;margin-top:auto;}
+.vl-shop-card button{border:1px solid var(--stroke-2);border-radius:7px;padding:9px 12px;font-size:11px;}
+.vl-shop-card button:disabled{opacity:.5;cursor:not-allowed;}
+@media(max-width:690px){.vl-shop{grid-template-columns:1fr;}}
