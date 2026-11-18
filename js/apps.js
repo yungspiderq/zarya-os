@@ -1240,7 +1240,7 @@
         '        <button type="button" class="btn btn--danger" data-act="reset-game">Начать заново</button>' +
         '      </div>' +
         '    </section>' +
-        '    <p class="set-foot">ЗАРЯ OS 2.2 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
+        '    <p class="set-foot">ЗАРЯ OS 2.2.1 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
         '  </div>' +
         '</div>'
       );
