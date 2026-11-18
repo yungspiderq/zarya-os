@@ -252,6 +252,7 @@
         '<button type="button" class="btn" data-my="benchmark">Запустить бенчмарк</button>' +
         '<button type="button" class="btn" data-my="cooling">Охлаждение ПК</button>' +
         '<button type="button" class="btn" data-my="market">Техно-барахолка</button>' +
+        '<button type="button" class="btn btn--primary" data-my="company">Моя компания</button>' +
         '<button type="button" class="btn" data-my="service">Сервисный центр</button>' +
         '<button type="button" class="btn" data-my="orders">Сборка на заказ</button>' +
         '<button type="button" class="btn" data-my="arcade">Аркада</button></div>' +
@@ -265,6 +266,7 @@
       root.querySelector('[data-my="benchmark"]').addEventListener('click', function () { api.open('benchmark'); });
       root.querySelector('[data-my="cooling"]').addEventListener('click', function () { api.open('cooling'); });
       root.querySelector('[data-my="market"]').addEventListener('click', function () { api.open('flea-market'); });
+      root.querySelector('[data-my="company"]').addEventListener('click', function () { api.open('company'); });
       root.querySelector('[data-my="service"]').addEventListener('click', function () { api.open('service'); });
       root.querySelector('[data-my="orders"]').addEventListener('click', function () { api.open('pc-orders'); });
       root.querySelector('[data-my="drive"]').addEventListener('click', function () { api.open('drive-lab'); });
