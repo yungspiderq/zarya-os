@@ -229,6 +229,8 @@
         '<div class="pc-actions"><button type="button" class="btn btn--primary" data-my="shop">Магазин комплектующих</button>' +
         '<button type="button" class="btn" data-my="workbench">Заменить процессор</button>' +
         '<button type="button" class="btn" data-my="drive">Монтаж SSD</button>' +
+        '<button type="button" class="btn" data-my="benchmark">Запустить бенчмарк</button>' +
+        '<button type="button" class="btn" data-my="service">Сервисный центр</button>' +
         '<button type="button" class="btn" data-my="arcade">Аркада</button></div>' +
         '<p class="muted pc-disclaimer">Это игровой компьютер: показатели FPS и задержки условные. ' +
         'Материнская плата в симуляции использует сокет LGA1200 и память DDR4.</p></div>'
@@ -237,6 +239,8 @@
       root.querySelector('[data-my="shop"]').addEventListener('click', function () { api.open('shop'); });
       root.querySelector('[data-my="workbench"]').addEventListener('click', function () { api.open('workbench'); });
       root.querySelector('[data-my="arcade"]').addEventListener('click', function () { api.open('arcade'); });
+      root.querySelector('[data-my="benchmark"]').addEventListener('click', function () { api.open('benchmark'); });
+      root.querySelector('[data-my="service"]').addEventListener('click', function () { api.open('service'); });
       root.querySelector('[data-my="drive"]').addEventListener('click', function () { api.open('drive-lab'); });
       update = render;
       listen(update);
