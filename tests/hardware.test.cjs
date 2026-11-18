@@ -57,7 +57,10 @@ function boot(opts = {}) {
   assert.equal(G.installedPart('gpu').id, 'gpu0');
   assert.equal(G.installedPart('ram').id, 'ram0');
   assert.equal(G.partsCatalog('cpu').length, 5);
-  assert.equal(G.partsCatalog().length, 29);
+  assert.equal(G.partsCatalog().length, 34);
+  assert.equal(G.installedPart('cooler').id, 'cooler0');
+  assert.equal(G.partsCatalog('cooler').length, 5);
+  assert.equal(G.installPart('cooler1').ok, false);
   assert.equal(G.installedPart('board').id, 'board0');
   assert.equal(G.installedPart('psu').id, 'psu0');
   assert.equal(G.installedPart('ssd').id, 'ssd0');
