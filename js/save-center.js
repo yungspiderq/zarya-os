@@ -5,7 +5,7 @@
     'zarya.seen','zarya.settings.v2','zarya.fs.v3','zarya.game.v1',
     'zarya.hardware.v1','zarya.components.v2',
     'zarya.service.v1','zarya.pc-orders.v1','zarya.cooling.v1',
-    'zarya.market.v1','zarya.company.v1'
+    'zarya.market.v1','zarya.company.v1','zarya.pro-workshop.v1'
   ];
   const MAX_FILE = 3 * 1024 * 1024;
   const MAX_VALUE = 2 * 1024 * 1024;
@@ -28,7 +28,7 @@
         if (raw !== null) records[key] = raw;
       });
       const backup = {
-        format: FORMAT, schema: 1, version: '2.0.0',
+        format: FORMAT, schema: 1, version: '2.1.0',
         exportedAt: new Date().toISOString(), data: records
       };
       const serialized = JSON.stringify(backup, null, 2);
@@ -46,7 +46,7 @@
       if (!backup || typeof backup !== 'object' || Array.isArray(backup) ||
           backup.format !== FORMAT || backup.schema !== 1 ||
           !backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data)) {
-        return { ok: false, msg: 'Файл не является резервной копией Zarya OS 2.0.' };
+        return { ok: false, msg: 'Файл не является резервной копией Zarya OS.' };
       }
       const keys = Object.keys(backup.data);
       if (!keys.length) return { ok: false, msg: 'В резервной копии нет данных.' };
@@ -77,6 +77,7 @@
           'zarya.game.v1': ['v', 1],
           'zarya.components.v2': ['v', 2],
           'zarya.company.v1': ['v', 1],
+          'zarya.pro-workshop.v1': ['v', 1],
           'zarya.market.v1': ['v', 1],
           'zarya.service.v1': ['version', 1],
           'zarya.pc-orders.v1': ['version', 1],
