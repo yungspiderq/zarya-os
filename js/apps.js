@@ -1280,7 +1280,7 @@
         '<div class="app about">' +
         '  <div class="about-head">' +
         '    <span class="about-logo">' + window.ICONS.start + '</span>' +
-        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.5 «Железная мастерская» · сборка 20261118</p></div>' +
+        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.5.1 «Железная мастерская» · сборка 20261118</p></div>' +
         '  </div>' +
         '  <div class="about-grid">' +
         '    <div><span>Процессор</span><b data-el="cpu">1 ядро</b></div>' +
