@@ -11,7 +11,7 @@
   const lockClock = document.getElementById('lockClock');
   const lockDate = document.getElementById('lockDate');
 
-  const DESKTOP_ORDER = ['mail', 'terminal', 'netmap', 'files', 'notes', 'shop', 'pc', 'workbench', 'drive-lab', 'service', 'benchmark', 'arcade', 'settings', 'about'];
+  const DESKTOP_ORDER = ['mail', 'terminal', 'netmap', 'files', 'notes', 'shop', 'pc', 'workbench', 'drive-lab', 'service', 'pc-orders', 'benchmark', 'arcade', 'settings', 'about'];
 
   const qs = { wifi: true, bluetooth: false, plane: false, eco: false };
   let started = false;

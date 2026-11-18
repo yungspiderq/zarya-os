@@ -511,7 +511,8 @@
       started: Date.now(),
       caughtCount: 0,
       earned: 0,
-      servicePaid: []
+      servicePaid: [],
+      buildPaid: []
     };
   }
 
@@ -662,6 +663,19 @@
     caughtCount: function () { return st.caughtCount; },
     started: function () { return st.started; },
     earned: function () { return st.earned; },
+    awardBuildContract: function (id, amount) {
+      if (typeof id !== 'string' || !/^build-[0-9]{2}$/.test(id) ||
+          !Number.isSafeInteger(amount) || amount < 1 || amount > 1000) {
+        return { ok: false, msg: 'Некорректная выплата за сборку.' };
+      }
+      if (!Array.isArray(st.buildPaid)) st.buildPaid = [];
+      if (st.buildPaid.includes(id)) return { ok: false, alreadyPaid: true, msg: 'За эту сборку деньги уже получены.' };
+      st.buildPaid.push(id);
+      st.money += amount;
+      st.earned += amount;
+      save();
+      return { ok: true, reward: amount, msg: '+' + amount + ' ₡ за компьютер клиента.' };
+    },
     awardServiceContract: function (id, amount) {
       // Stored in the main campaign save to avoid paying the same service job twice.
       if (typeof id !== 'string' || !/^svc-[0-9]{2}$/.test(id) ||

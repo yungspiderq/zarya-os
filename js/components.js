@@ -231,6 +231,7 @@
         '<button type="button" class="btn" data-my="drive">Монтаж SSD</button>' +
         '<button type="button" class="btn" data-my="benchmark">Запустить бенчмарк</button>' +
         '<button type="button" class="btn" data-my="service">Сервисный центр</button>' +
+        '<button type="button" class="btn" data-my="orders">Сборка на заказ</button>' +
         '<button type="button" class="btn" data-my="arcade">Аркада</button></div>' +
         '<p class="muted pc-disclaimer">Это игровой компьютер: показатели FPS и задержки условные. ' +
         'Материнская плата в симуляции использует сокет LGA1200 и память DDR4.</p></div>'
@@ -241,6 +242,7 @@
       root.querySelector('[data-my="arcade"]').addEventListener('click', function () { api.open('arcade'); });
       root.querySelector('[data-my="benchmark"]').addEventListener('click', function () { api.open('benchmark'); });
       root.querySelector('[data-my="service"]').addEventListener('click', function () { api.open('service'); });
+      root.querySelector('[data-my="orders"]').addEventListener('click', function () { api.open('pc-orders'); });
       root.querySelector('[data-my="drive"]').addEventListener('click', function () { api.open('drive-lab'); });
       update = render;
       listen(update);
