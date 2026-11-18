@@ -89,8 +89,8 @@ function inspect(G, id) {
     assert.equal(o.condition, null, 'condition is hidden until diagnostic mini-game');
     assert.equal(o.sold, false);
   }
-  const second = boot({ data }).G.marketOffers().map(x => x.id);
-  assert.deepEqual(second, offers.map(x => x.id), 'daily stock must be stable after reload');
+  const second = Array.from(boot({ data }).G.marketOffers(), x => x.id);
+  assert.deepEqual(second, Array.from(offers, x => x.id), 'daily stock must be stable after reload');
   assert.equal(G.marketInspection('unknown'), null);
   assert.equal(G.marketCheck('unknown', true).ok, false);
 })();
