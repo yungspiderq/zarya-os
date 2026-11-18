@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const G = window.Game;
+  G.version = '1.3.0';
   const KEY = 'zarya.hardware.v1';
   const ITEMS = [
     {
