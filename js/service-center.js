@@ -276,7 +276,12 @@
         if (r.ok) {
           window.UI.toast(r.msg, 'ok');
           render();
-        } else hint.textContent = r.msg;
+        } else {
+          // The game save may synchronously re-render this window.
+          // Always write to the *live* hint, not the stale node from before the update.
+          const liveHint = root && root.querySelector('[data-svc="detail"] .svc-hint');
+          if (liveHint) liveHint.textContent = r.msg;
+        }
       }
       const active = info.active && info.active.id === selectedCase.id ? info.active : null;
       if (selectedCase.status === 'done') {
