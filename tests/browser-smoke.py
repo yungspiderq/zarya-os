@@ -53,6 +53,9 @@ try:
         page.evaluate("window.Game.companyCancel()")
         page.locator('[data-hq-tab="achievements"]').click()
         assert page.locator(".hq-ach-card").count() == 12
+        # A brand-new profile does not write zarya.game.v1 until the first game action.
+        # Persist a harmless zero-cost action to exercise a real game backup.
+        assert page.evaluate("window.Game.spendFunds(0).ok")
         page.evaluate("(window.WM.open('save-center'), true)")
         page.wait_for_selector(".sv-app")
         assert page.locator('[data-save="export"]').count() == 1
