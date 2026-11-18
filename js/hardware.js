@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const G = window.Game;
-  G.version = '1.8.0';
+  G.version = '1.9.0';
 
   const KEY = 'zarya.components.v2';
   const OLD_KEY = 'zarya.hardware.v1';
@@ -58,6 +58,7 @@
       v: 2,
       installed: { cpu: 'cpu0', gpu: 'gpu0', ram: 'ram0', board: 'board0', psu: 'psu0', ssd: 'ssd0', cooler: 'cooler0' },
       inventory: [],
+      marketUsed: {},
       credits: 0,
       best: {},
       paidAt: {}
@@ -98,6 +99,19 @@
     const p = part(id);
     return p && !p.builtin && !Object.values(state.installed).includes(id);
   });
+  if (!state.marketUsed || typeof state.marketUsed !== 'object' || Array.isArray(state.marketUsed)) state.marketUsed = {};
+  const safeUsed = {};
+  Object.keys(state.marketUsed).forEach(function (id) {
+    const data = state.marketUsed[id];
+    if (!part(id) || !data || typeof data !== 'object') return;
+    if (!state.inventory.includes(id) && !Object.values(state.installed).includes(id)) return;
+    const condition = Math.round(Number(data.condition));
+    const paid = Math.round(Number(data.paid));
+    if (!Number.isSafeInteger(condition) || condition < 35 || condition > 100 ||
+        !Number.isSafeInteger(paid) || paid < 1 || paid > part(id).price) return;
+    safeUsed[id] = { condition: condition, paid: paid, serviced: data.serviced === true };
+  });
+  state.marketUsed = safeUsed;
   state.credits = Math.max(0, Math.floor(Number(state.credits) || 0));
   if (!state.best || typeof state.best !== 'object') state.best = {};
   if (!state.paidAt || typeof state.paidAt !== 'object') state.paidAt = {};
@@ -158,6 +172,69 @@
     state.inventory.push(id);
     save();
     return { ok: true, msg: p.name + ' куплен и добавлен в инвентарь. Перейди в «Мой ПК» для установки.' };
+  };
+
+  G.marketCondition = function (id) {
+    const d = state.marketUsed[id];
+    return d ? Object.assign({ used: true }, d) : null;
+  };
+  G.buyUsedPart = function (id, amount, condition) {
+    const p = part(id);
+    if (!p || p.builtin || p.price <= 0 || G.hasPart(id)) {
+      return { ok: false, msg: 'Эту деталь нельзя купить: она уже есть у тебя или недоступна.' };
+    }
+    if (!Number.isSafeInteger(amount) || amount < Math.floor(p.price * 0.25) ||
+        amount > Math.round(p.price * 0.75) ||
+        !Number.isSafeInteger(condition) || condition < 35 || condition > 95) {
+      return { ok: false, msg: 'Некорректные данные лота.' };
+    }
+    const result = G.spendFunds(amount);
+    if (!result.ok) return result;
+    state.inventory.push(id);
+    state.marketUsed[id] = { condition: condition, paid: amount, serviced: false };
+    save();
+    return { ok: true, msg: 'Куплено: ' + p.name + ' за ' + amount + ' ₡. Состояние ' + condition + '%.' };
+  };
+  G.marketSaleQuote = function (id) {
+    const p = part(id);
+    if (!p || !state.inventory.includes(id) || p.builtin || p.price <= 0) {
+      return { ok: false, msg: 'Продавать можно только запасные платные детали из инвентаря.' };
+    }
+    const record = state.marketUsed[id];
+    const normal = Math.max(1, Math.floor(p.price * 0.45));
+    const usedValue = record
+      ? Math.min(normal, Math.max(1, Math.floor(record.paid * (0.70 + record.condition * 0.001))))
+      : normal;
+    return { ok: true, price: usedValue, name: p.name, used: !!record };
+  };
+  G.marketSellPart = function (id) {
+    const quote = G.marketSaleQuote(id);
+    if (!quote.ok) return quote;
+    const transfer = G.creditMarketSale(quote.price);
+    if (!transfer.ok) return transfer;
+    state.inventory = state.inventory.filter(function (x) { return x !== id; });
+    delete state.marketUsed[id];
+    save();
+    return { ok: true, amount: quote.price, msg: 'Продано: ' + quote.name + '. +' + quote.price + ' ₡.' };
+  };
+  G.marketRefurbish = function (id, steps) {
+    const r = state.marketUsed[id];
+    if (!r || !state.inventory.includes(id)) {
+      return { ok: false, msg: 'Для восстановления нужна б/у деталь в инвентаре.' };
+    }
+    if (steps !== 3) return { ok: false, msg: 'Не все три проверки завершены.' };
+    if (r.serviced) return { ok: false, msg: 'Эта деталь уже восстановлена.' };
+    r.condition = 100;
+    r.serviced = true;
+    save();
+    return { ok: true, msg: 'Обслуживание завершено. Состояние ' + part(id).name + ': 100%.' };
+  };
+  G.marketWearPenalty = function () {
+    const types = ['cpu', 'gpu', 'ram', 'ssd'];
+    return Math.min(24, types.reduce(function (sum, type) {
+      const data = state.marketUsed[state.installed[type]];
+      return sum + (data ? Math.max(0, Math.round((100 - data.condition) / 6)) : 0);
+    }, 0));
   };
 
   function equip(id, type) {
@@ -289,8 +366,9 @@
   };
 
   G.performance = function () {
-    const fps = Math.min(120, Math.round(12 + G.level('gpu') * 22 + G.level('cpu') * 4 + G.level('ram') * 3));
-    const latency = Math.max(0, 150 - G.level('cpu') * 22 - G.level('ram') * 17);
+    const wearPenalty = G.marketWearPenalty();
+    const fps = Math.max(8, Math.min(120, Math.round(12 + G.level('gpu') * 22 + G.level('cpu') * 4 + G.level('ram') * 3)) - wearPenalty);
+    const latency = Math.max(0, 150 - G.level('cpu') * 22 - G.level('ram') * 17) + wearPenalty;
     return {
       fps: fps,
       bootSeconds: G.systemHealth().bootSeconds,
