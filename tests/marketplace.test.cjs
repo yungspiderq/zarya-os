@@ -76,7 +76,7 @@ function inspect(G, id) {
 (function testOffersAndStorefront() {
   const { G, data, window } = boot();
   const offers = G.marketOffers();
-  assert.equal(G.version, '1.9.0');
+  assert.equal(G.version, '2.0.0');
   assert.equal(G.partsCatalog().length, 34);
   assert.equal(offers.length, 7);
   assert.equal(new Set(offers.map(x => x.type)).size, 7);

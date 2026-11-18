@@ -1222,11 +1222,12 @@
         '      <h3>Игра</h3>' +
         '      <p class="muted" data-el="stats"></p>' +
         '      <div class="set-actions">' +
-        '        <button type="button" class="btn" data-act="reset-theme">Сбросить оформление</button>' +
+        '        <button type="button" class="btn btn--primary" data-act="backup">Резервные копии</button>' +
+         '        <button type="button" class="btn" data-act="reset-theme">Сбросить оформление</button>' +
         '        <button type="button" class="btn btn--danger" data-act="reset-game">Начать заново</button>' +
         '      </div>' +
         '    </section>' +
-        '    <p class="set-foot">ЗАРЯ OS 1.2 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
+        '    <p class="set-foot">ЗАРЯ OS 2.0 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
         '  </div>' +
         '</div>'
       );
@@ -1247,6 +1248,7 @@
         });
       });
 
+      root.querySelector('[data-act="backup"]').addEventListener('click', function () { api.open('save-center'); });
       root.querySelector('[data-act="reset-theme"]').addEventListener('click', function () {
         window.Settings.reset();
         render();
