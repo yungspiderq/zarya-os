@@ -1,0 +1,77 @@
+/* ЗАРЯ OS 1.9 — техно-барахолка и мастерская восстановления */
+.flea-app { height:100%; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior-y:contain; scrollbar-gutter:stable; padding:22px; }
+.flea-app .app-head { margin-bottom:15px; gap:18px; }
+.flea-wallet { display:flex; flex-direction:column; gap:4px; align-items:flex-end; white-space:nowrap; text-align:right; }
+.flea-wallet b { color:var(--text); font-size:18px; }
+.flea-wallet small { color:var(--text-2); font-size:10px; }
+.flea-wallet span { color:var(--accent); }
+.flea-tabs { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:9px 0 14px; margin-bottom:14px; border-bottom:1px solid var(--stroke); position:sticky; top:-22px; z-index:5; background:var(--win-body); }
+.flea-tabs button { background:var(--card); border:1px solid var(--stroke-2); padding:9px 13px; border-radius:8px; font-size:12px; font-weight:650; color:var(--text-2); transition:background .15s, border .15s; }
+.flea-tabs button:hover { background:var(--card-2); }
+.flea-tabs button.active { color:var(--accent); border-color:var(--accent); background:var(--card-2); }
+.flea-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.flea-offer { min-width:0; display:flex; flex-direction:column; gap:8px; background:var(--card); border:1px solid var(--stroke-2); border-radius:12px; padding:13px 15px; color:var(--text); text-align:left; transition:border-color .15s,background .15s; }
+.flea-offer:hover { background:var(--card-2); border-color:var(--accent); }
+.flea-offer.selected { border-color:var(--accent); box-shadow:inset 3px 0 var(--accent); }
+.flea-offer.disabled { opacity:.65; }
+.flea-offer-head { display:flex; justify-content:space-between; gap:10px; align-items:center; min-width:0; }
+.flea-kind { color:var(--text-3); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.flea-discount { color:#5ed4af; border:1px solid rgba(60,186,141,.35); background:rgba(60,186,141,.08); padding:4px 7px; border-radius:6px; font-size:11px; font-weight:750; }
+.flea-art { display:grid; place-items:center; height:85px; width:100%; border-radius:8px; background:radial-gradient(circle at 48% 48%, rgba(101,165,189,.21), transparent 68%),var(--card-2); }
+.flea-art span { display:grid; place-items:center; width:76px; height:58px; color:#d6f7ff; font:800 15px var(--mono); letter-spacing:.045em; transform:rotate(-6deg); border-radius:8px; background:linear-gradient(125deg,#316b83,#113e57); border:3px solid #64bfd2; box-shadow:0 7px 16px rgba(0,0,0,.15),inset 0 0 0 5px rgba(0,0,0,.11); }
+.flea-name { font-size:15px; line-height:1.3; overflow-wrap:anywhere; }
+.flea-desc { font-size:11px; color:var(--text-2); line-height:1.4; min-height:16px; }
+.flea-prices { display:flex; align-items:baseline; gap:9px; }
+.flea-prices b { font-size:16px; }
+.flea-prices s { color:var(--text-3); font-size:12px; }
+.flea-state { margin-top:auto; padding-top:8px; border-top:1px solid var(--stroke); font-size:10px; color:var(--accent); font-weight:750; letter-spacing:.02em; }
+.flea-inspect { margin-top:16px; }
+.flea-inspect-inner { border-radius:12px; border:1px solid var(--stroke-2); background:var(--card); padding:17px 18px; }
+.flea-detail-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:13px; padding-bottom:12px; margin-bottom:13px; border-bottom:1px solid var(--stroke); }
+.flea-detail-header h3 { font-size:17px; line-height:1.35; margin:5px 0; overflow-wrap:anywhere; }
+.flea-detail-header p { line-height:1.45; font-size:11px; }
+.flea-condition { background:var(--card-2); border:1px solid var(--stroke-2); border-radius:7px; padding:7px 10px; font-size:12px; font-weight:700; color:var(--accent); white-space:nowrap; }
+.flea-question { border:1px solid var(--stroke); background:var(--card-2); border-radius:10px; padding:14px 15px; display:flex; flex-direction:column; gap:10px; }
+.flea-question small { font-size:10px; font-weight:800; letter-spacing:.05em; color:var(--accent); }
+.flea-question h4 { font-size:14px; }
+.flea-question p { color:var(--text); font-size:13px; line-height:1.5; }
+.flea-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.flea-actions button { border:1px solid var(--stroke-2); border-radius:8px; padding:9px 13px; font-size:12px; }
+.flea-checked { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:14px; }
+.flea-checked p { font-size:12px; color:var(--text-2); line-height:1.5; max-width:400px; }
+.flea-checked > div { display:flex; align-items:center; flex-wrap:wrap; gap:11px; }
+.flea-checked strong { font-size:18px; }
+.flea-checked button { border-radius:8px; padding:10px 13px; border:1px solid var(--stroke-2); }
+.flea-checked button:disabled { opacity:.45; cursor:not-allowed; }
+.flea-sell h3, .flea-refurb h3 { font-size:17px; margin:3px 0 7px; }
+.flea-sell>p,.flea-refurb>p { font-size:12px; line-height:1.5; margin-bottom:15px; }
+.flea-sell-row { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:13px 15px; background:var(--card); border:1px solid var(--stroke-2); border-radius:10px; margin-bottom:9px; }
+.flea-sell-row>div:first-child { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.flea-sell-row h4 { font-size:14px; font-weight:700; overflow-wrap:anywhere; }
+.flea-sell-row small { font-size:11px; color:var(--text-2); }
+.flea-sell-right { display:flex; gap:11px; align-items:center; flex-shrink:0; }
+.flea-sell-right strong { color:var(--accent); font-size:13px; white-space:nowrap; }
+.flea-sell-row button { border:1px solid var(--stroke-2); border-radius:8px; padding:8px 12px; font-size:11px; white-space:normal; }
+.flea-empty { border:1px dashed var(--stroke-2); border-radius:10px; padding:16px; background:var(--card); color:var(--text-2); line-height:1.6; font-size:12px; }
+.flea-repair-board { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(190px,1fr); gap:13px; background:var(--card); border:1px solid var(--stroke-2); padding:15px; border-radius:12px; }
+.flea-repair-chip { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:14px; min-height:235px; background:repeating-linear-gradient(90deg,transparent 0 29px,rgba(90,171,141,.14) 30px,transparent 31px),linear-gradient(125deg,#133d3c,#092827); border:4px solid #246c59; border-radius:9px; }
+.flea-repair-core { display:grid; place-items:center; width:102px; height:102px; transform:rotate(-6deg); color:#d6f9ed; border-radius:10px; border:8px solid #7dcaa3; box-shadow:0 10px 22px rgba(0,0,0,.3); background:linear-gradient(135deg,#387263,#1b524a); font:800 20px var(--mono); }
+.flea-repair-chip span { font:700 11px var(--mono); color:#9cd8be; letter-spacing:.07em; }
+.flea-repair-task { display:flex; flex-direction:column; justify-content:center; align-items:stretch; gap:11px; }
+.flea-repair-task small { color:var(--accent); font-size:10px; font-weight:800; line-height:1.4; }
+.flea-repair-task h4 { line-height:1.45; font-size:16px; }
+.flea-repair-task p { font-size:12px; color:var(--text-2); line-height:1.5; }
+.flea-repair-task button { padding:10px 12px; border:1px solid var(--stroke-2); border-radius:8px; font-size:12px; }
+.flea-repair-task .flea-cancel { color:var(--text-2); }
+.flea-hint { border-left:3px solid var(--accent); border-radius:4px; background:var(--card-2); font-size:12px; line-height:1.55; color:var(--text-2); padding:11px 13px; margin-top:13px; }
+.flea-disclaimer { font-size:11px; line-height:1.55; margin-top:15px; }
+.flea-app .pc-actions { margin-top:14px; }
+@media(max-width:690px) {
+  .flea-app { padding:14px; }
+  .flea-tabs { top:-14px; }
+  .flea-grid { grid-template-columns:1fr; }
+  .flea-repair-board { grid-template-columns:1fr; }
+  .flea-repair-chip { min-height:160px; }
+  .flea-sell-row { flex-wrap:wrap; }
+  .flea-sell-right { width:100%; justify-content:space-between; }
+}

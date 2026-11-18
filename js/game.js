@@ -663,6 +663,14 @@
     caughtCount: function () { return st.caughtCount; },
     started: function () { return st.started; },
     earned: function () { return st.earned; },
+    creditMarketSale: function (amount) {
+      if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1500) {
+        return { ok: false, msg: 'Некорректная сумма продажи.' };
+      }
+      st.money += amount;
+      save();
+      return { ok: true, msg: 'Пополнение за продажу: +' + amount + ' ₡.' };
+    },
     awardBuildContract: function (id, amount) {
       if (typeof id !== 'string' || !/^build-[0-9]{2}$/.test(id) ||
           !Number.isSafeInteger(amount) || amount < 1 || amount > 1000) {

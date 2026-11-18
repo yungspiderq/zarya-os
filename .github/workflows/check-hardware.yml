@@ -1,4 +1,4 @@
-name: Check Zarya OS 1.8 hardware, cooling and services
+name: Check Zarya OS 1.9 hardware and used-parts marketplace
 
 on:
   pull_request:
@@ -39,6 +39,8 @@ jobs:
         run: node tests/pc-orders.test.cjs
       - name: Test cooling mechanics and saves
         run: node tests/cooling.test.cjs
+      - name: Test used marketplace and item resale
+        run: node tests/marketplace.test.cjs
       - name: Check page integrations
         run: |
-          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css","js/service-center.js","css/service-center.css","js/pc-orders.js","css/pc-orders.css","js/cooling.js","css/cooling.css"])if(!x.includes(f+"?v=1.8.0"))throw Error("Missing cache-safe asset: "+f)'
+          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css","js/service-center.js","css/service-center.css","js/pc-orders.js","css/pc-orders.css","js/cooling.js","css/cooling.css","js/marketplace.js","css/marketplace.css"])if(!x.includes(f+"?v=1.9.0"))throw Error("Missing cache-safe asset: "+f)'
