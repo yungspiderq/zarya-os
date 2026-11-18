@@ -6,3 +6,8 @@ desktop.ini
 
 # локальные черновики
 *.local.*
+
+# Verified server state contains private guest-session cookies and must never be committed.
+server/data/
+server/*.sqlite
+server/*.sqlite-*
