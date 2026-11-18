@@ -17,6 +17,6 @@ assert.match(shopBlock[1], /overflow-y\s*:\s*auto\s*;/);
 assert.match(shopBlock[1], /overflow-x\s*:\s*hidden\s*;/);
 assert.match(css, /\.parts-app\s+\.part-products[\s\S]*?flex-shrink\s*:\s*0/);
 assert.match(css, /\.parts-app\s+\.part-categories\s*\{[^}]*position\s*:\s*sticky/);
-assert.match(component, /class=\\"app parts-app\\" tabindex=\\"0\\"/);
+assert.ok(component.includes('class="app parts-app" tabindex="0"'), 'shop must accept keyboard focus');
 assert.match(page, /href="css\/components\.css\?v=1\.5\.1"/);
 console.log('Component shop scroll CSS and keyboard navigation regression checks passed.');
