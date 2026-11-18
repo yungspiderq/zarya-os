@@ -1280,7 +1280,7 @@
         '<div class="app about">' +
         '  <div class="about-head">' +
         '    <span class="about-logo">' + window.ICONS.start + '</span>' +
-        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.3 «Апгрейд» · сборка 20261118</p></div>' +
+        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.4 «Сборка ПК» · сборка 20261118</p></div>' +
         '  </div>' +
         '  <div class="about-grid">' +
         '    <div><span>Процессор</span><b data-el="cpu">1 ядро</b></div>' +
@@ -1297,7 +1297,7 @@
         '  </div>' +
         '</div>'
       );
-      box.querySelector('[data-el="cpu"]').textContent = window.Game.shop()[0].levels[window.Game.level('cpu')];
+      box.querySelector('[data-el="cpu"]').textContent = window.Game.installedPart('cpu').name;
       box.querySelector('[data-el="fs"]').textContent = window.FS.formatBytes(window.FS.size());
       box.querySelector('[data-el="pwned"]').textContent = stats.pwned + ' / ' + stats.total;
       box.querySelector('[data-el="miss"]').textContent = stats.missionsDone + ' / ' + stats.missionsTotal;
