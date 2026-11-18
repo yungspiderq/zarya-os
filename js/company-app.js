@@ -63,9 +63,13 @@
       parent.appendChild(hero);
       const actions=el('<div class="hq-quick"><button class="btn btn--primary" type="button" data-goto="contracts">Принять заказ</button>' +
         '<button class="btn" type="button" data-goto="upgrades">Улучшить мастерскую</button>' +
-        '<button class="btn" type="button" data-goto="achievements">Достижения</button></div>');
+        '<button class="btn" type="button" data-goto="achievements">Достижения</button>' +
+        '<button class="btn" type="button" data-open-pro>Сложные заказы</button></div>');
       actions.querySelectorAll('[data-goto]').forEach(function(b){
         b.addEventListener('click',function(){tab=b.getAttribute('data-goto');paint();});
+      });
+      actions.querySelector('[data-open-pro]').addEventListener('click',function(){
+        api.open('pro-workshop');
       });
       parent.appendChild(actions);
       const metrics=el('<div class="hq-two-col"><section class="hq-panel hq-stat-bars"></section>' +
