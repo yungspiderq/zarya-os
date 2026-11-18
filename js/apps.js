@@ -16,6 +16,36 @@
     return '[' + '#'.repeat(fill) + '·'.repeat(Math.max(0, w - fill)) + ']';
   }
 
+  /* — глифы типов заказов и ролей узлов — */
+  const TYPE_GLYPH = {
+    data: 'doc',
+    intel: 'eye',
+    stealth: 'mask',
+    wipe: 'eraser',
+    inject: 'chip',
+    decrypt: 'key',
+    system: 'chip'
+  };
+
+  const ROLE_GLYPH = {
+    school: 'server',
+    office: 'briefcase',
+    market: 'cart',
+    dc: 'rack',
+    ghost: 'ghost',
+    cafe: 'cafe',
+    telco: 'antenna'
+  };
+
+  function glyph(name, cls) {
+    const svg = window.ICONS[name] || '';
+    return '<span class="glyph ' + (cls || '') + '" aria-hidden="true">' + svg + '</span>';
+  }
+
+  function typeGlyph(type, cls) {
+    return glyph(TYPE_GLYPH[type] || 'chip', cls);
+  }
+
   /* ===========================================================
      ТЕРМИНАЛ
      =========================================================== */
@@ -43,6 +73,9 @@
       '  ls                        файлы локально или на узле\n' +
       '  cat <файл>                прочитать файл\n' +
       '  download <файл>           скачать файл в ~/loot\n' +
+      '  decrypt <файл>            вскрыть зашифрованный файл\n' +
+      '  wipe <файл>               уничтожить файл на узле\n' +
+      '  inject                    поставить имплант на узле\n' +
       '  disconnect                отключиться от узла\n' +
       '  hide                      сбросить след (80 ₡)\n' +
       '  missions                  активные заказы\n' +
@@ -119,7 +152,7 @@
         const act = G.activeMissions();
         if (!act.length) print('активных заказов нет. Почта → принять заказ.', 'warn');
         else act.forEach(function (m) {
-          print('  [' + m.id + '] ' + m.subject + ' → ' + m.server + ' (' + m.goal.kind + ' ' + m.goal.file + ') · ' + m.reward + ' ₡');
+          print('  [' + m.id + '] ' + m.subject + ' → ' + m.server + ' · ' + m.goalText + ' · ' + m.reward + ' ₡');
         });
         return;
       }
@@ -128,7 +161,7 @@
         print('побочные контракты (не блокируют сюжет):');
         side.forEach(function (m) {
           const mark = m.status === 'done' ? 'выполнен' : m.status === 'active' ? 'в работе' : 'доступен';
-          print('  [' + m.id + '] ' + m.subject.padEnd(24) + m.server.padEnd(16) + m.reward + ' ₡ · ' + mark);
+          print('  [' + m.id + '] ' + m.subject.padEnd(22) + ' ' + m.typeLabel.padEnd(12) + m.reward + ' ₡ · ' + mark);
         });
         print('  взять контракт: Почта → заказ → «Принять заказ»', 'dim');
         return;
@@ -203,6 +236,29 @@
         updateHud();
         return;
       }
+      if (cmd === 'wipe') {
+        if (!args[0]) { print('нужно: wipe <файл>', 'err'); return; }
+        const r = G.wipe(args[0]);
+        print(r.msg, r.ok ? 'ok' : 'err');
+        if (r.mission) missionDone(r.mission);
+        updateHud();
+        return;
+      }
+      if (cmd === 'inject') {
+        const r = G.inject();
+        print(r.msg, r.ok ? 'ok' : 'err');
+        if (r.mission) missionDone(r.mission);
+        updateHud();
+        return;
+      }
+      if (cmd === 'decrypt') {
+        if (!args[0]) { print('нужно: decrypt <файл>', 'err'); return; }
+        const r = G.decrypt(args[0]);
+        print(r.msg, r.ok ? 'ok' : 'err');
+        if (r.mission) missionDone(r.mission);
+        updateHud();
+        return;
+      }
       if (cmd === 'shop') {
         print('магазин:');
         G.shop().forEach(function (item) {
@@ -228,6 +284,10 @@
     }
 
     function missionDone(hit) {
+      if (hit.rejected) {
+        print('заказ не засчитан: нужен след ≤ ' + hit.need + '%, а сейчас ' + hit.trace + '%.', 'warn');
+        return;
+      }
       print('заказ выполнен: +' + fmt(hit.reward) + ' ₡ · репутация +' + hit.mission.rep, 'ok');
     }
 
@@ -345,9 +405,19 @@
       mails.forEach(function (m) {
         const item = document.createElement('button');
         item.type = 'button';
+        const type = m.type || 'system';
         item.className = 'mail-item' + (m.id === selected ? ' is-active' : '') +
           (window.Game.readFlag(m.id) ? '' : ' is-unread');
-        item.innerHTML = '<span class="mail-from"></span><span class="mail-subj"></span>';
+        item.innerHTML =
+          '<span class="mail-ava t-' + type + '">' + typeGlyph(type) + '</span>' +
+          '<span class="mail-main">' +
+          '  <span class="mail-from"></span>' +
+          '  <span class="mail-subj"></span>' +
+          '  <span class="mail-chips">' +
+          (m.typeLabel ? '<span class="chip chip--' + type + '">' + m.typeLabel + '</span>' : '') +
+          (m.reward ? '<span class="chip chip--reward">' + fmt(m.reward) + ' ₡</span>' : '') +
+          '  </span>' +
+          '</span>';
         item.querySelector('.mail-from').textContent = m.from;
         item.querySelector('.mail-subj').textContent = m.subject;
         if (m.status) {
@@ -368,11 +438,34 @@
       if (!mail) return;
       window.Game.markRead(mail.id);
 
+      const type = mail.type || 'system';
+      const srv = mail.server ? window.Game.server(mail.server) : null;
+      const chips =
+        (mail.typeLabel ? '<span class="chip chip--' + type + '">' + typeGlyph(type) + mail.typeLabel + '</span>' : '') +
+        (mail.reward ? '<span class="chip chip--reward">' + fmt(mail.reward) + ' ₡</span>' : '') +
+        (srv ? '<span class="chip chip--sec">защита ' + srv.sec + ' / 5</span>' : '');
+
+      const brief = mail.goal
+        ? '<div class="mail-brief">' +
+          '  <div class="mb-row"><span>цель</span><b>' + (mail.goalShort || mail.goalText) + '</b></div>' +
+          '  <div class="mb-row"><span>узел</span><b>' + mail.server + (srv ? ' · ' + srv.name : '') + '</b></div>' +
+          (mail.goal.maxTrace !== undefined
+            ? '<div class="mb-row"><span>условие</span><b class="mb-warn">след к моменту чтения ≤ ' + mail.goal.maxTrace + '%</b></div>'
+            : '') +
+          '  <div class="mb-row"><span>награда</span><b class="mb-reward">' + fmt(mail.reward) + ' ₡</b></div>' +
+          '</div>'
+        : '';
+
       body.innerHTML =
         '<div class="mail-head">' +
-        '  <h3 data-el="subject"></h3>' +
-        '  <div class="mail-meta"><span data-el="from"></span> · <span data-el="addr"></span></div>' +
+        '  <span class="mail-ava mail-ava--lg t-' + type + '">' + typeGlyph(type) + '</span>' +
+        '  <div class="mail-head-main">' +
+        '    <h3 data-el="subject"></h3>' +
+        '    <div class="mail-meta"><span data-el="from"></span> · <span data-el="addr"></span></div>' +
+        '    <div class="mail-chips">' + chips + '</div>' +
+        '  </div>' +
         '</div>' +
+        brief +
         '<pre class="mail-text" data-el="text"></pre>' +
         '<div class="mail-actions" data-el="actions"></div>';
 
@@ -456,15 +549,20 @@
       grid.innerHTML = '';
 
       G.servers().forEach(function (s) {
+        const role = s.role || 'server';
+        const roleIcon = window.ICONS[ROLE_GLYPH[role] || 'server'];
         const node = h(
-          '<article class="node">' +
+          '<article class="node node--' + role + '">' +
+          '  <span class="node-art" aria-hidden="true">' + roleIcon + '</span>' +
           '  <header class="node-head">' +
+          '    <span class="node-role" aria-hidden="true">' + roleIcon + '</span>' +
           '    <span class="node-name"></span>' +
           '    <span class="node-state"></span>' +
           '  </header>' +
           '  <div class="node-ip"></div>' +
           '  <div class="node-sec" title="Уровень защиты"></div>' +
           '  <p class="node-ports"></p>' +
+          '  <p class="node-note"></p>' +
           '  <div class="node-actions">' +
           '    <button type="button" class="btn btn--sm" data-act="scan">Сканировать</button>' +
           '    <button type="button" class="btn btn--sm btn--primary" data-act="go">Войти</button>' +
@@ -474,6 +572,7 @@
 
         node.querySelector('.node-name').textContent = s.name;
         node.querySelector('.node-ip').textContent = s.ip;
+        node.classList.toggle('is-pwned', !!s.pwned);
         const state = node.querySelector('.node-state');
         state.className = 'node-state ' + (s.pwned ? 'is-pwned' : s.known ? 'is-known' : 'is-unknown');
         state.textContent = s.pwned ? 'взломан' : s.known ? 'известен' : 'нет данных';
@@ -485,9 +584,27 @@
           sec.appendChild(b);
         }
 
-        node.querySelector('.node-ports').textContent = s.known
-          ? s.ports.map(function (p) { return p.n + '/' + p.s; }).join('  ')
-          : 'порты не просканированы';
+        const ports = node.querySelector('.node-ports');
+        if (s.known) {
+          s.ports.forEach(function (p) {
+            const chip = document.createElement('span');
+            chip.className = 'port';
+            chip.textContent = p.n + ' · ' + p.s;
+            ports.appendChild(chip);
+          });
+          if (s.implant) {
+            const chip = document.createElement('span');
+            chip.className = 'port port--implant';
+            chip.textContent = 'implant · zarya.svc';
+            ports.appendChild(chip);
+          }
+        } else {
+          ports.textContent = 'порты не просканированы';
+        }
+
+        node.querySelector('.node-note').textContent = s.known
+          ? s.note
+          : 'узел не просканирован — что это, пока неизвестно';
 
         node.querySelector('[data-act="scan"]').addEventListener('click', function () {
           Terminal.exec('scan ' + s.ip);
@@ -503,6 +620,7 @@
     function mount(api) {
       root = h(
         '<div class="app net">' +
+        '  <div class="net-title"><h2>Сеть</h2><span>карта узлов · всё вымышлено</span></div>' +
         '  <div class="net-head">' +
         '    <div class="stat"><span>Баланс</span><b data-el="money">0 ₡</b></div>' +
         '    <div class="stat"><span>Репутация</span><b data-el="rep">0</b></div>' +
@@ -831,6 +949,118 @@
   const Shop = (function () {
     let root = null;
 
+    const ART = {
+      cpu:
+        '<svg viewBox="0 0 240 120" fill="none" aria-hidden="true">' +
+        '<defs>' +
+        '<radialGradient id="artCpuGlow" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="0" stop-color="var(--accent)" stop-opacity=".5"/>' +
+        '<stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>' +
+        '</radialGradient>' +
+        '<linearGradient id="artCpuDie" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="var(--accent)" stop-opacity=".95"/>' +
+        '<stop offset="1" stop-color="var(--accent)" stop-opacity=".35"/>' +
+        '</linearGradient>' +
+        '</defs>' +
+        '<ellipse cx="120" cy="62" rx="98" ry="46" fill="url(#artCpuGlow)"/>' +
+        '<g stroke="var(--accent)" stroke-opacity=".32" stroke-width="1.3" stroke-linecap="round">' +
+        '<path d="M24 30h28l12 12M24 90h28l12-12M216 30h-28l-12 12M216 90h-28l-12-12M24 60h16M216 60h-16"/>' +
+        '<circle cx="24" cy="30" r="2" fill="var(--accent)" stroke="none"/>' +
+        '<circle cx="24" cy="90" r="2" fill="var(--accent)" stroke="none"/>' +
+        '<circle cx="216" cy="30" r="2" fill="var(--accent)" stroke="none"/>' +
+        '<circle cx="216" cy="90" r="2" fill="var(--accent)" stroke="none"/>' +
+        '</g>' +
+        '<rect x="80" y="20" width="80" height="80" rx="11" fill="#0c1a25" stroke="var(--accent)" stroke-opacity=".55"/>' +
+        '<rect x="92" y="32" width="56" height="56" rx="6" fill="url(#artCpuDie)" opacity=".22"/>' +
+        '<rect x="104" y="44" width="32" height="32" rx="5" fill="url(#artCpuDie)"/>' +
+        '<g stroke="#0a141c" stroke-width="2.4" opacity=".6">' +
+        '<path d="M110 52h8M122 52h8M110 60h20M110 68h8M122 68h8"/>' +
+        '</g>' +
+        '<g stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-opacity=".75">' +
+        '<path d="M96 10v10M112 10v10M128 10v10M144 10v10M96 100v10M112 100v10M128 100v10M144 100v10"/>' +
+        '<path d="M70 36h10M70 52h10M70 68h10M70 84h10M160 36h10M160 52h10M160 68h10M160 84h10"/>' +
+        '</g>' +
+        '</svg>',
+      proxy:
+        '<svg viewBox="0 0 240 120" fill="none" aria-hidden="true">' +
+        '<defs><radialGradient id="artProxyGlow" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="0" stop-color="var(--accent)" stop-opacity=".38"/>' +
+        '<stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>' +
+        '</radialGradient></defs>' +
+        '<ellipse cx="120" cy="60" rx="104" ry="46" fill="url(#artProxyGlow)"/>' +
+        '<path d="M50 78L92 40l52 36 46-44" stroke="var(--accent)" stroke-opacity=".55" stroke-width="1.6" stroke-dasharray="5 5" stroke-linecap="round"/>' +
+        '<g>' +
+        '<circle cx="50" cy="78" r="21" stroke="var(--accent)" stroke-opacity=".18"/>' +
+        '<circle cx="50" cy="78" r="12" fill="#0c1a25" stroke="var(--accent)" stroke-opacity=".7"/>' +
+        '<circle cx="50" cy="78" r="4.5" fill="var(--accent)"/>' +
+        '<circle cx="92" cy="40" r="16" stroke="var(--accent)" stroke-opacity=".2"/>' +
+        '<circle cx="92" cy="40" r="9" fill="#0c1a25" stroke="var(--accent)" stroke-opacity=".6"/>' +
+        '<circle cx="92" cy="40" r="3.4" fill="var(--accent)"/>' +
+        '<circle cx="144" cy="76" r="24" stroke="var(--accent)" stroke-opacity=".16"/>' +
+        '<circle cx="144" cy="76" r="13" fill="#0c1a25" stroke="var(--accent)" stroke-opacity=".7"/>' +
+        '<circle cx="144" cy="76" r="5" fill="var(--accent)"/>' +
+        '<circle cx="190" cy="32" r="20" stroke="var(--accent)" stroke-opacity=".18"/>' +
+        '<circle cx="190" cy="32" r="11" fill="#0c1a25" stroke="var(--accent)" stroke-opacity=".7"/>' +
+        '<circle cx="190" cy="32" r="4.2" fill="var(--accent)"/>' +
+        '</g>' +
+        '<g stroke="var(--accent)" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round">' +
+        '<path d="M186 96h28M196 88h8M200 104h20"/>' +
+        '<path d="M26 40h22M30 32h14"/>' +
+        '</g>' +
+        '</svg>',
+      scripts:
+        '<svg viewBox="0 0 240 120" fill="none" aria-hidden="true">' +
+        '<defs><radialGradient id="artScrGlow" cx="50%" cy="50%" r="50%">' +
+        '<stop offset="0" stop-color="var(--accent)" stop-opacity=".34"/>' +
+        '<stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>' +
+        '</radialGradient></defs>' +
+        '<ellipse cx="120" cy="62" rx="98" ry="48" fill="url(#artScrGlow)"/>' +
+        '<rect x="44" y="22" width="152" height="80" rx="9" fill="#0c1a25" stroke="var(--accent)" stroke-opacity=".5"/>' +
+        '<path d="M44 38h152" stroke="var(--accent)" stroke-opacity=".3"/>' +
+        '<g fill="var(--accent)" opacity=".55">' +
+        '<circle cx="56" cy="30" r="2.6"/><circle cx="66" cy="30" r="2.6"/><circle cx="76" cy="30" r="2.6"/>' +
+        '</g>' +
+        '<g stroke-linecap="round" stroke-width="3">' +
+        '<path d="M58 52h44" stroke="var(--accent)" stroke-opacity=".85"/>' +
+        '<path d="M58 63h72" stroke="var(--accent)" stroke-opacity=".45"/>' +
+        '<path d="M58 74h56" stroke="var(--accent)" stroke-opacity=".6"/>' +
+        '<path d="M58 85h32" stroke="var(--accent)" stroke-opacity=".35"/>' +
+        '</g>' +
+        '<path d="M154 46l-22 30h18l-8 26 26-34h-18z" fill="var(--accent)" fill-opacity=".85" stroke="#0c1a25" stroke-width="2" stroke-linejoin="round"/>' +
+        '<g stroke="var(--accent)" stroke-opacity=".45" stroke-width="1.4" stroke-linecap="round">' +
+        '<path d="M24 30h10M24 40h6M206 88h12M212 78h8"/>' +
+        '</g>' +
+        '</svg>',
+      ice:
+        '<svg viewBox="0 0 240 120" fill="none" aria-hidden="true">' +
+        '<defs>' +
+        '<linearGradient id="artIceA" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="#8fe9ff" stop-opacity=".85"/>' +
+        '<stop offset="1" stop-color="#2f9fe0" stop-opacity=".18"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="artIceB" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="#c8f4ff" stop-opacity=".9"/>' +
+        '<stop offset="1" stop-color="#4cc2ff" stop-opacity=".15"/>' +
+        '</linearGradient>' +
+        '<radialGradient id="artIceGlow" cx="50%" cy="60%" r="50%">' +
+        '<stop offset="0" stop-color="#7fe3ff" stop-opacity=".4"/>' +
+        '<stop offset="1" stop-color="#7fe3ff" stop-opacity="0"/>' +
+        '</radialGradient>' +
+        '</defs>' +
+        '<ellipse cx="120" cy="76" rx="98" ry="38" fill="url(#artIceGlow)"/>' +
+        '<path d="M22 96h196" stroke="#7fe3ff" stroke-opacity=".35" stroke-width="1.4" stroke-linecap="round"/>' +
+        '<path d="M64 96l24-58 26 58z" fill="url(#artIceA)" stroke="#bff2ff" stroke-opacity=".55"/>' +
+        '<path d="M104 96l30-74 34 74z" fill="url(#artIceB)" stroke="#dff9ff" stroke-opacity=".7"/>' +
+        '<path d="M152 96l20-44 24 44z" fill="url(#artIceA)" stroke="#bff2ff" stroke-opacity=".5"/>' +
+        '<g stroke="#e9fcff" stroke-opacity=".45" stroke-width="1.2" stroke-linecap="round">' +
+        '<path d="M134 22v30M134 60v28M78 58l12 20M166 52l-10 22"/>' +
+        '</g>' +
+        '<g stroke="#bff2ff" stroke-width="1.6" stroke-linecap="round" stroke-opacity=".7">' +
+        '<path d="M34 34l8 8M42 34l-8 8M196 30l6 6M202 30l-6 6M184 72l5 5M189 72l-5 5"/>' +
+        '</g>' +
+        '</svg>'
+    };
+
     function render() {
       if (!root || !root.isConnected) return;
       const G = window.Game;
@@ -844,8 +1074,10 @@
         const cost = maxed ? 0 : item.costs[lvl];
         const card = h(
           '<article class="shop-card">' +
+          '  <div class="shop-art">' + (ART[item.id] || '') + '</div>' +
           '  <header><h3></h3><span class="lvl"></span></header>' +
           '  <p class="desc"></p>' +
+          (item.effect ? '  <span class="shop-effect">' + item.effect + '</span>' : '') +
           '  <div class="pips"></div>' +
           '  <footer><b class="cost"></b><button type="button" class="btn btn--primary btn--sm">Купить</button></footer>' +
           '</article>'
@@ -870,6 +1102,28 @@
         });
         grid.appendChild(card);
       });
+
+      const bonuses = [
+        { label: 'скорость brute', value: G.level('cpu') * 45, max: 180, sign: '+' },
+        { label: 'снижение следа', value: G.level('proxy') * 18, max: 72, sign: '−' },
+        { label: 'награда за заказ', value: G.level('scripts') * 15, max: 30, sign: '+' },
+        { label: 'след от download', value: G.level('ice') * 30, max: 60, sign: '−' }
+      ];
+      const bonusBox = root.querySelector('[data-el="bonus"]');
+      bonusBox.innerHTML = '';
+      bonuses.forEach(function (b) {
+        const row = h(
+          '<div class="bonus">' +
+          '  <span></span>' +
+          '  <b></b>' +
+          '  <div class="bonus-bar"><i></i></div>' +
+          '</div>'
+        );
+        row.querySelector('span').textContent = b.label;
+        row.querySelector('b').textContent = b.value ? b.sign + b.value + '%' : '0%';
+        row.querySelector('.bonus-bar i').style.width = Math.min(100, (b.value / b.max) * 100) + '%';
+        bonusBox.appendChild(row);
+      });
     }
 
     function mount(api) {
@@ -880,6 +1134,10 @@
         '    <div class="balance"><span>Баланс</span><b data-el="money">0 ₡</b></div>' +
         '  </div>' +
         '  <div class="shop-grid" data-el="grid"></div>' +
+        '  <section class="shop-bonuses">' +
+        '    <h3>Текущие бонусы</h3>' +
+        '    <div class="bonus-grid" data-el="bonus"></div>' +
+        '  </section>' +
         '  <p class="shop-note">Апгрейды покупаются один раз и работают до конца сессии. ' +
         'Деньги приходят только за выполненные заказы. Если след дойдёт до 100% — штраф 35% баланса.</p>' +
         '</div>'
@@ -968,7 +1226,7 @@
         '        <button type="button" class="btn btn--danger" data-act="reset-game">Начать заново</button>' +
         '      </div>' +
         '    </section>' +
-        '    <p class="set-foot">ЗАРЯ OS 1.1 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
+        '    <p class="set-foot">ЗАРЯ OS 1.2 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
         '  </div>' +
         '</div>'
       );
@@ -1022,7 +1280,7 @@
         '<div class="app about">' +
         '  <div class="about-head">' +
         '    <span class="about-logo">' + window.ICONS.start + '</span>' +
-        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.1 «Ночная смена» · сборка 20261118</p></div>' +
+        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.2 «Холодный след» · сборка 20261118</p></div>' +
         '  </div>' +
         '  <div class="about-grid">' +
         '    <div><span>Процессор</span><b data-el="cpu">1 ядро</b></div>' +

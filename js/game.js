@@ -7,6 +7,7 @@
     {
       ip: '10.0.0.7',
       name: 'Школьный сервер',
+      role: 'school',
       os: 'Windows Server 2008',
       sec: 1,
       note: 'Машина из кабинета информатики. Пароль наверняка из учебника.',
@@ -30,6 +31,7 @@
     {
       ip: '172.16.4.12',
       name: 'Бухгалтерия «Ромашка»',
+      role: 'office',
       os: 'Windows 10 Pro',
       sec: 2,
       note: 'Бухгалтерия маленькой фирмы. Сервер подняли впопыхах.',
@@ -52,6 +54,7 @@
     {
       ip: '45.13.88.2',
       name: 'Тёмный рынок',
+      role: 'market',
       os: 'Debian 11 (nginx)',
       sec: 3,
       note: 'Закрытый маркетплейс. Хорошего там мало, но платят за данные.',
@@ -66,12 +69,22 @@
             '2026-10-11 04:02 [warn]  probe from 91.204.17.55 — сканер портов\n' +
             '2026-10-11 04:03 [info]  «Север» интересуется нашими логами. Убрать зеркало.'
         },
-        { name: 'wallet.dat', body: 'Кошелёк: 4.5 BTC. Парольная фраза внутри контейнера.' }
+        {
+          name: 'mirror.log',
+          body:
+            '2026-10-11 04:03 [info]  «Север» интересуется нашими логами. Убрать зеркало.\n' +
+            '2026-10-12 01:20 [mirror] rsync /var/log/deals.log → 91.204.17.55:/mirror/\n' +
+            '2026-10-12 01:24 [mirror] синхронизация завершена, 812 МБ\n' +
+            '2026-10-12 01:25 [warn]  зеркало доступно по внутреннему адресу без пароля\n\n' +
+            '[файл лежит на этом узле. Если его прочитать — станет ясно, куда ушли копии]'
+        },
+        { name: 'wallet.dat', enc: true, body: 'Кошелёк: 4.5 BTC. Парольная фраза внутри контейнера.' }
       ]
     },
     {
       ip: '91.204.17.55',
       name: 'Дата-центр «Север»',
+      role: 'dc',
       os: 'Ubuntu Server 24.04',
       sec: 4,
       note: 'Промышленный узел. Здесь ходят чужие ключи.',
@@ -97,6 +110,7 @@
     {
       ip: '10.10.10.10',
       name: 'УЗЕЛ 0',
+      role: 'ghost',
       os: 'неизвестно',
       sec: 5,
       note: 'Порт открыт всегда. Отклик приходит раньше, чем запрос.',
@@ -119,6 +133,7 @@
     {
       ip: '192.168.88.14',
       name: 'Кофейня FreeWiFi',
+      role: 'cafe',
       os: 'Linux Mint 21',
       sec: 2,
       note: 'Точка доступа в кофейне. Камера, роутер и чей-то ноутбук на одном пароле.',
@@ -150,6 +165,7 @@
     {
       ip: '77.88.44.19',
       name: 'Оператор «Волна»',
+      role: 'telco',
       os: 'FreeBSD 13',
       sec: 4,
       note: 'Провинциальный оператор связи. Биллинг, детализация и много чужих номеров.',
@@ -232,6 +248,83 @@
       requires: null,
       server: '77.88.44.19',
       goal: { kind: 'download', file: 'subscribers.csv' }
+    },
+    {
+      id: 's4',
+      type: 'stealth',
+      side: true,
+      from: 'БИРЖА',
+      fromMail: 'board@zarya.local',
+      subject: 'ни одного следа',
+      body:
+        'Побочный контракт с особым условием.\n\n' +
+        '10.0.0.7, школьный сервер. Прочитай passwords.txt — но только на холодную голову.\n' +
+        'Заказчик платит за работу, а не за шум: если след к моменту чтения будет выше 20%, ' +
+        'сделка отменяется.\n\n' +
+        'Совет: сначала hide, потом connect. Не скачивай ничего лишнего.',
+      hint: 'hide → scan → connect → brute → cat passwords.txt при следе ≤ 20%',
+      reward: 210,
+      rep: 1,
+      requires: null,
+      server: '10.0.0.7',
+      goal: { kind: 'read', file: 'passwords.txt', maxTrace: 20 }
+    },
+    {
+      id: 's5',
+      type: 'wipe',
+      side: true,
+      from: 'БИРЖА',
+      fromMail: 'board@zarya.local',
+      subject: 'концы в воду',
+      body:
+        'Побочный контракт. Работа грязная, но чистая.\n\n' +
+        '45.13.88.2, тёмный рынок. На узле лежит mirror.log — журнал, куда ушли копии сделок.\n' +
+        'Нужно не скачать, а уничтожить: wipe mirror.log.\n\n' +
+        'Файл маленький, но за ним стоят люди, которым не нужны свидетели.',
+      hint: 'connect → brute → wipe mirror.log (файл исчезнет с узла)',
+      reward: 340,
+      rep: 1,
+      requires: null,
+      server: '45.13.88.2',
+      goal: { kind: 'wipe', file: 'mirror.log' }
+    },
+    {
+      id: 's6',
+      type: 'inject',
+      side: true,
+      from: 'БИРЖА',
+      fromMail: 'board@zarya.local',
+      subject: 'свой человек',
+      body:
+        'Побочный контракт на установку.\n\n' +
+        '91.204.17.55, дата-центр «Север». Не нужно ничего забирать — нужно оставить.\n' +
+        'Подключись, войди и поставь имплант: inject.\n\n' +
+        'Он тихо ждёт в zarya.svc и не трогает чужие файлы. Узел охраняют, так что прокси не помешает.',
+      hint: 'connect → brute → inject (на узле появится zarya.svc)',
+      reward: 520,
+      rep: 1,
+      requires: null,
+      server: '91.204.17.55',
+      goal: { kind: 'inject', file: 'zarya.svc' }
+    },
+    {
+      id: 's7',
+      type: 'decrypt',
+      side: true,
+      from: 'БИРЖА',
+      fromMail: 'board@zarya.local',
+      subject: 'закрытый кошелёк',
+      body:
+        'Побочный контракт на дешифровку.\n\n' +
+        '45.13.88.2, тёмный рынок. Там лежит wallet.dat — зашифрованный контейнер.\n' +
+        'Скачать его бесполезно, сначала расшифруй на месте: decrypt wallet.dat.\n\n' +
+        'Ключ, говорят, валялся рядом в логах. Но платят за результат, а не за метод.',
+      hint: 'connect → brute → decrypt wallet.dat (нужен доступ к узлу)',
+      reward: 480,
+      rep: 1,
+      requires: null,
+      server: '45.13.88.2',
+      goal: { kind: 'decrypt', file: 'wallet.dat' }
     },
     {
       id: 'm1',
@@ -336,6 +429,7 @@
     {
       id: 'cpu',
       name: 'Процессор',
+      effect: '+45% к скорости brute',
       desc: 'Быстрее подбор пароля. Каждый уровень +45% к скорости brute.',
       costs: [120, 320, 780, 1700],
       max: 4,
@@ -344,6 +438,7 @@
     {
       id: 'proxy',
       name: 'Прокси-цепочка',
+      effect: '−18% к приросту следа',
       desc: 'Снижает прирост следа. Каждый уровень −18% к trace.',
       costs: [160, 420, 980, 2400],
       max: 4,
@@ -352,6 +447,7 @@
     {
       id: 'scripts',
       name: 'Скрипт-кит',
+      effect: '+15% к награде',
       desc: 'Готовые эксплойты. +15% к награде за заказ.',
       costs: [400, 1100],
       max: 2,
@@ -360,6 +456,7 @@
     {
       id: 'ice',
       name: 'Ледокол',
+      effect: '−30% к следу от download',
       desc: 'Глушит журналы узла при скачивании. Каждый уровень −30% к следу от download.',
       costs: [260, 700],
       max: 2,
@@ -368,6 +465,31 @@
   ];
 
   const HIDE_COST = 80;
+
+  const TYPE_BY_KIND = {
+    download: 'data',
+    read: 'intel',
+    wipe: 'wipe',
+    inject: 'inject',
+    decrypt: 'decrypt'
+  };
+
+  const TYPE_LABEL = {
+    data: 'данные',
+    intel: 'разведка',
+    stealth: 'скрытность',
+    wipe: 'зачистка',
+    inject: 'имплант',
+    decrypt: 'дешифровка'
+  };
+
+  const GOAL_VERB = {
+    download: 'скачать',
+    read: 'прочитать',
+    wipe: 'уничтожить',
+    inject: 'установить имплант',
+    decrypt: 'расшифровать'
+  };
 
   function fresh() {
     return {
@@ -383,6 +505,9 @@
       active: [],
       done: [],
       read: [],
+      wiped: {},
+      implants: {},
+      decrypted: [],
       started: Date.now(),
       caughtCount: 0,
       earned: 0
@@ -442,6 +567,20 @@
     save();
   }, 1000);
 
+  function missionType(m) {
+    return m.type || TYPE_BY_KIND[m.goal.kind] || 'data';
+  }
+
+  function goalText(m) {
+    const verb = GOAL_VERB[m.goal.kind] || 'выполнить';
+    const base = verb + ' ' + m.goal.file;
+    return m.goal.maxTrace !== undefined ? base + ' при следе ≤ ' + m.goal.maxTrace + '%' : base;
+  }
+
+  function goalShort(m) {
+    return (GOAL_VERB[m.goal.kind] || 'выполнить') + ' ' + m.goal.file;
+  }
+
   function missionById(id) {
     return MISSIONS.find(function (m) { return m.id === id; }) || null;
   }
@@ -451,6 +590,19 @@
     if (st.active.indexOf(m.id) >= 0) return 'active';
     if (m.requires && st.done.indexOf(m.requires) < 0) return 'locked';
     return 'available';
+  }
+
+  function visibleFiles(s) {
+    const gone = st.wiped[s.ip] || [];
+    return s.files.filter(function (f) { return gone.indexOf(f.name) < 0; });
+  }
+
+  function fileOn(s, name) {
+    return visibleFiles(s).find(function (f) { return f.name === name; }) || null;
+  }
+
+  function decrypted(s, name) {
+    return st.decrypted.indexOf(s.ip + ':' + name) >= 0;
   }
 
   function matchGoal(kind, file, ip) {
@@ -463,6 +615,14 @@
       );
     })[0];
     if (!hit) return null;
+    if (hit.goal.maxTrace !== undefined && st.trace > hit.goal.maxTrace + 0.001) {
+      return {
+        rejected: true,
+        mission: hit,
+        need: hit.goal.maxTrace,
+        trace: Math.round(st.trace)
+      };
+    }
     st.active = st.active.filter(function (x) { return x !== hit.id; });
     st.done.push(hit.id);
     const reward = Math.round(hit.reward * (1 + st.scripts * 0.15));
@@ -480,12 +640,14 @@
         return {
           ip: s.ip,
           name: s.name,
+          role: s.role,
           os: s.os,
           sec: s.sec,
           note: s.note,
           ports: s.ports,
           known: !!st.known[s.ip],
           pwned: !!st.pwned[s.ip],
+          implant: !!st.implants[s.ip],
           files: s.files.length
         };
       });
@@ -502,11 +664,18 @@
     level: function (id) { return st[id] || 0; },
     shop: function () { return SHOP; },
     hideCost: HIDE_COST,
-    version: '1.1.0',
+    version: '1.2.0',
+
+    goalText: goalText,
 
     missions: function () {
       return MISSIONS.map(function (m) {
-        return Object.assign({}, m, { status: missionStatus(m) });
+        return Object.assign({}, m, {
+          status: missionStatus(m),
+          type: missionType(m),
+          typeLabel: TYPE_LABEL[missionType(m)] || 'заказ',
+          goalText: goalText(m)
+        });
       });
     },
     mails: function () {
@@ -523,7 +692,11 @@
           hint: m.hint,
           reward: m.reward,
           server: m.server,
-          goal: m.goal
+          goal: m.goal,
+          type: missionType(m),
+          typeLabel: TYPE_LABEL[missionType(m)] || 'заказ',
+          goalText: goalText(m),
+          goalShort: goalShort(m)
         });
       });
       return out;
@@ -650,11 +823,14 @@
       if (!session.authed) return { ok: false, msg: 'Сначала авторизуйся: brute' };
       const s = server(session.ip);
       addTrace(1.5);
+      const lines = visibleFiles(s).map(function (f, i) {
+        const mark = f.enc && !decrypted(s, f.name) ? '   [зашифрован]' : '';
+        return '  ' + String(i + 1).padStart(2, '0') + '  ' + f.name + '   ' + f.body.length + ' Б' + mark;
+      });
+      if (st.implants[s.ip]) lines.push('  --  zarya.svc   implant · активен');
       return {
         ok: true,
-        msg: s.files.map(function (f, i) {
-          return '  ' + String(i + 1).padStart(2, '0') + '  ' + f.name + '   ' + f.body.length + ' Б';
-        }).join('\n')
+        msg: lines.join('\n')
       };
     },
 
@@ -662,8 +838,11 @@
       if (!session) return { ok: false, msg: 'Нет соединения.' };
       if (!session.authed) return { ok: false, msg: 'Сначала авторизуйся: brute' };
       const s = server(session.ip);
-      const f = s.files.find(function (x) { return x.name === name; });
+      const f = fileOn(s, name);
       if (!f) return { ok: false, msg: 'файл не найден: ' + name };
+      if (f.enc && !decrypted(s, name)) {
+        return { ok: false, msg: 'файл зашифрован: ' + name + '\nрасшифруй на месте: decrypt ' + name };
+      }
       if (addTrace(3)) return { ok: false, msg: 'След переполнен. Соединение сброшено.' };
       const hit = matchGoal('read', f.name, s.ip);
       return {
@@ -677,8 +856,11 @@
       if (!session) return { ok: false, msg: 'Нет соединения.' };
       if (!session.authed) return { ok: false, msg: 'Сначала авторизуйся: brute' };
       const s = server(session.ip);
-      const f = s.files.find(function (x) { return x.name === name; });
+      const f = fileOn(s, name);
       if (!f) return { ok: false, msg: 'файл не найден: ' + name };
+      if (f.enc && !decrypted(s, name)) {
+        return { ok: false, msg: 'шифр нечитаем: сначала decrypt ' + name };
+      }
       const noise = 7 * Math.max(0.1, 1 - (st.ice || 0) * 0.3);
       if (addTrace(noise)) return { ok: false, msg: 'След переполнен во время скачивания.' };
       const dir = '/home/loot/' + s.ip;
@@ -688,6 +870,60 @@
       return {
         ok: true,
         msg: 'скачано: ' + s.ip + '/' + f.name + ' → ~/loot/' + s.ip + '/' + f.name,
+        mission: hit
+      };
+    },
+
+    wipe: function (name) {
+      if (!session) return { ok: false, msg: 'Нет соединения.' };
+      if (!session.authed) return { ok: false, msg: 'Сначала авторизуйся: brute' };
+      const s = server(session.ip);
+      const f = fileOn(s, name);
+      if (!f) return { ok: false, msg: 'файл не найден: ' + name };
+      if (addTrace(5)) return { ok: false, msg: 'След переполнен во время зачистки.' };
+      if (!st.wiped[s.ip]) st.wiped[s.ip] = [];
+      st.wiped[s.ip].push(name);
+      const hit = matchGoal('wipe', f.name, s.ip);
+      save();
+      return {
+        ok: true,
+        msg: 'файл уничтожен: ' + s.ip + '/' + f.name + ' · след +5',
+        mission: hit
+      };
+    },
+
+    inject: function () {
+      if (!session) return { ok: false, msg: 'Нет соединения.' };
+      if (!session.authed) return { ok: false, msg: 'Сначала авторизуйся: brute' };
+      const s = server(session.ip);
+      if (st.implants[s.ip]) return { ok: false, msg: 'имплант уже стоит на ' + s.ip };
+      if (addTrace(6)) return { ok: false, msg: 'След переполнен при установке.' };
+      st.implants[s.ip] = true;
+      const hit = matchGoal('inject', 'zarya.svc', s.ip);
+      save();
+      return {
+        ok: true,
+        msg: 'имплант установлен: ' + s.ip + '/zarya.svc\nон молчит и ждёт команды',
+        mission: hit
+      };
+    },
+
+    decrypt: function (name) {
+      if (!session) return { ok: false, msg: 'Нет соединения.' };
+      if (!session.authed) return { ok: false, msg: 'Сначала авторизуйся: brute' };
+      const s = server(session.ip);
+      const f = fileOn(s, name);
+      if (!f) return { ok: false, msg: 'файл не найден: ' + name };
+      if (!f.enc) return { ok: false, msg: name + ' не зашифрован' };
+      if (decrypted(s, name)) return { ok: false, msg: name + ' уже расшифрован' };
+      const noise = 9 * Math.max(0.35, 1 - (st.ice || 0) * 0.2);
+      if (addTrace(noise)) return { ok: false, msg: 'След переполнен во время дешифровки.' };
+      st.decrypted.push(s.ip + ':' + name);
+      const hit = matchGoal('decrypt', name, s.ip);
+      save();
+      return {
+        ok: true,
+        msg: 'контейнер вскрыт: ' + name + '\n── ' + name + ' ──\n' + f.body,
         mission: hit
       };
     },

@@ -92,7 +92,75 @@
       '<rect x="3.4" y="13.4" width="7.2" height="7.2" rx="1.2"/>' +
       '<rect x="13.4" y="13.4" width="7.2" height="7.2" rx="1.2"/>'
     ),
-    lock: line('<rect x="4.8" y="10.4" width="14.4" height="9.6" rx="2.2"/><path d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.6 0v2.6"/>')
+    lock: line('<rect x="4.8" y="10.4" width="14.4" height="9.6" rx="2.2"/><path d="M8.2 10.4V7.8a3.8 3.8 0 0 1 7.6 0v2.6"/>'),
+
+    /* — типы заказов — */
+    doc: line(
+      '<path d="M6.4 3h7.4L19 8.2V21H6.4z"/><path d="M13.6 3v5.2H19"/>' +
+      '<path d="M11 11.6v4.8M8.8 14.2L11 16.4l2.2-2.2"/>'
+    ),
+    eye: line(
+      '<path d="M2.6 12s3.6-6.4 9.4-6.4S21.4 12 21.4 12s-3.6 6.4-9.4 6.4S2.6 12 2.6 12z"/>' +
+      '<circle cx="12" cy="12" r="3"/>'
+    ),
+    mask: line(
+      '<path d="M3.4 9.8h17.2M8.2 9.8V7a3.8 3.8 0 0 1 7.6 0v2.8"/>' +
+      '<circle cx="8" cy="14.8" r="2.8"/><circle cx="16" cy="14.8" r="2.8"/><path d="M10.8 14.8h2.4"/>'
+    ),
+    eraser: line(
+      '<path d="M8.4 20.4h11.2"/>' +
+      '<path d="M4.8 15.2l6.6-6.6a2 2 0 0 1 2.8 0l3 3a2 2 0 0 1 0 2.8l-4.4 4.4H7.9z"/>' +
+      '<path d="M9.6 10.4l5 5"/>'
+    ),
+    chip: line(
+      '<rect x="6.4" y="6.4" width="11.2" height="11.2" rx="2"/>' +
+      '<rect x="9.8" y="9.8" width="4.4" height="4.4" rx=".8"/>' +
+      '<path d="M9.6 3v3.4M14.4 3v3.4M9.6 17.6V21M14.4 17.6V21M3 9.6h3.4M3 14.4h3.4M17.6 9.6H21M17.6 14.4H21"/>'
+    ),
+    key: line(
+      '<circle cx="8.2" cy="8.2" r="3.8"/>' +
+      '<path d="M10.9 10.9l8 8M16.2 16.2l2.2-2.2M18.4 18.4l2.2-2.2"/>'
+    ),
+
+    /* — роли узлов — */
+    server: line(
+      '<rect x="4" y="3.6" width="16" height="6.4" rx="1.6"/>' +
+      '<rect x="4" y="14" width="16" height="6.4" rx="1.6"/>' +
+      '<path d="M7.4 6.8h4M7.4 17.2h4"/>' +
+      '<circle cx="16.4" cy="6.8" r=".9" fill="currentColor" stroke="none"/>' +
+      '<circle cx="16.4" cy="17.2" r=".9" fill="currentColor" stroke="none"/>'
+    ),
+    briefcase: line(
+      '<rect x="3.4" y="7.4" width="17.2" height="11.6" rx="2.2"/>' +
+      '<path d="M9 7.4V5.6A1.6 1.6 0 0 1 10.6 4h2.8A1.6 1.6 0 0 1 15 5.6v1.8"/>' +
+      '<path d="M3.4 12.2h17.2"/>'
+    ),
+    cart: line(
+      '<path d="M3.4 4.6h2.4l2.2 9.6h9.4l2.2-6.6H7"/>' +
+      '<circle cx="9.6" cy="18.6" r="1.5"/><circle cx="16.6" cy="18.6" r="1.5"/>'
+    ),
+    rack: line(
+      '<rect x="5" y="3.4" width="14" height="7" rx="1.6"/>' +
+      '<rect x="5" y="13.6" width="14" height="7" rx="1.6"/>' +
+      '<path d="M8.4 6.9h4M8.4 17.1h4"/>' +
+      '<circle cx="16" cy="6.9" r=".9" fill="currentColor" stroke="none"/>' +
+      '<circle cx="16" cy="17.1" r=".9" fill="currentColor" stroke="none"/>'
+    ),
+    ghost: line(
+      '<path d="M6 20.4V10a6 6 0 0 1 12 0v10.4l-2.4-1.8-2.4 1.8-2.4-1.8-2.4 1.8z"/>' +
+      '<circle cx="9.8" cy="10.4" r="1" fill="currentColor" stroke="none"/>' +
+      '<circle cx="14.2" cy="10.4" r="1" fill="currentColor" stroke="none"/>'
+    ),
+    cafe: line(
+      '<path d="M4.6 8.6h11v5.8a5.4 5.4 0 0 1-5.4 5.4H10a5.4 5.4 0 0 1-5.4-5.4z"/>' +
+      '<path d="M15.6 10.6h1.6a2.6 2.6 0 0 1 0 5.2h-1.6"/>' +
+      '<path d="M5.6 3.4v2M9.4 2.6v2.8M13.2 3.4v2"/>'
+    ),
+    antenna: line(
+      '<path d="M12 13.4v7M8.4 20.4h7.2"/>' +
+      '<circle cx="12" cy="10.4" r="2.2"/>' +
+      '<path d="M7.8 13.6a6 6 0 0 1 0-8.4M16.2 13.6a6 6 0 0 0 0-8.4"/>'
+    )
   };
 
   /* — логотип «Пуск»: четыре квадрата — */

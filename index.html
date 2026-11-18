@@ -46,6 +46,49 @@
 
     <div class="desk" id="desk">
       <div class="desk-icons" id="deskIcons"></div>
+
+      <aside class="desk-widget" id="deskWidget" title="Открыть карту сети">
+        <div class="dw-head"><span class="dw-title">Сводка</span><span class="dw-live">live</span></div>
+        <div class="dw-radar" aria-hidden="true">
+          <svg viewBox="0 0 120 120" fill="none">
+            <defs>
+              <linearGradient id="dwSweep" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="var(--accent)" stop-opacity=".5"/>
+                <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+              </linearGradient>
+              <radialGradient id="dwGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="var(--accent)" stop-opacity=".18"/>
+                <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <circle cx="60" cy="60" r="52" fill="url(#dwGlow)"/>
+            <g stroke="var(--accent)" stroke-opacity=".22">
+              <circle cx="60" cy="60" r="50"/>
+              <circle cx="60" cy="60" r="34"/>
+              <circle cx="60" cy="60" r="18"/>
+              <path d="M60 10v100M10 60h100"/>
+            </g>
+            <g class="dw-sweep">
+              <path d="M60 60L60 10a50 50 0 0 1 35 15z" fill="url(#dwSweep)"/>
+              <path d="M60 60V10" stroke="var(--accent)" stroke-opacity=".8" stroke-width="1.2"/>
+            </g>
+            <g fill="var(--accent)">
+              <circle cx="42" cy="48" r="2.2"/>
+              <circle cx="78" cy="70" r="2.2" fill-opacity=".7"/>
+              <circle cx="62" cy="86" r="1.8" fill-opacity=".5"/>
+            </g>
+            <circle cx="60" cy="60" r="2.6" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <div class="dw-grid">
+          <div><span>Баланс</span><b data-el="dwMoney">0 ₡</b></div>
+          <div><span>След</span><b data-el="dwTrace">0%</b></div>
+          <div><span>Взломано</span><b data-el="dwPwned">0 / 0</b></div>
+          <div><span>Контракты</span><b data-el="dwSide">0 / 0</b></div>
+        </div>
+        <div class="dw-bar"><i data-el="dwBar"></i></div>
+      </aside>
+
       <div class="windows" id="windowsLayer"></div>
       <div class="snap-preview" id="snapPreview" aria-hidden="true"></div>
     </div>

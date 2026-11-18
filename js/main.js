@@ -283,6 +283,21 @@
     chip.querySelector('[data-el="traceVal"]').textContent = t + '%';
     chip.querySelector('[data-el="traceFill"]').style.width = t + '%';
     chip.querySelector('[data-el="money"]').textContent = fmt(G.money()) + ' ₡';
+
+    const widget = document.getElementById('deskWidget');
+    if (widget) {
+      const stats = G.stats();
+      const side = G.missions().filter(function (m) { return m.side; });
+      const sideDone = side.filter(function (m) { return m.status === 'done'; }).length;
+      widget.querySelector('[data-el="dwMoney"]').textContent = fmt(G.money()) + ' ₡';
+      widget.querySelector('[data-el="dwTrace"]').textContent = t + '%';
+      widget.querySelector('[data-el="dwPwned"]').textContent = stats.pwned + ' / ' + stats.total;
+      widget.querySelector('[data-el="dwSide"]').textContent = sideDone + ' / ' + side.length;
+      const bar = widget.querySelector('[data-el="dwBar"]');
+      bar.style.width = t + '%';
+      bar.classList.toggle('is-hot', t > 65);
+    }
+
     refreshBadges();
   }
 
@@ -399,6 +414,8 @@
       toggleQuick();
     });
     document.getElementById('hudChip').addEventListener('click', function () { window.WM.open('netmap'); });
+    const widget = document.getElementById('deskWidget');
+    if (widget) widget.addEventListener('click', function () { window.WM.open('netmap'); });
 
     document.getElementById('powerBtn').addEventListener('click', async function () {
       const yes = await window.UI.confirm('Завершить сессию?', 'Система вернётся к экрану входа. Прогресс сохранится.', 'Заблокировать');
