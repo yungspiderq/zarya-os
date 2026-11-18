@@ -1,0 +1,34 @@
+name: Publish Zarya OS 1.9.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-1.9.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.repository == 'yungspiderq/zarya-os'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Package standalone offline game
+        run: zip -q -r zarya-os-1.9.0.zip index.html css js docs README.md CHANGELOG.md RELEASE_NOTES_1.9.md LICENSE start.cmd
+      - name: Publish public GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.9.0 >/dev/null 2>&1; then
+            echo 'Release v1.9.0 already exists'
+            exit 0
+          fi
+          gh release create v1.9.0 zarya-os-1.9.0.zip \
+            --target "${GITHUB_SHA}" \
+            --title 'ЗАРЯ OS 1.9 «Техно-барахолка»' \
+            --notes-file RELEASE_NOTES_1.9.md \
+            --latest
