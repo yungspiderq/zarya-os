@@ -14,7 +14,8 @@ function storage(data){
 }
 function initGame(data){
   const window={dispatchEvent:()=>{}};
-  const ctx={window,localStorage:storage(data),Date,Math,JSON,Number,Array,Object,Set,Uint8Array};
+  const ctx={window,localStorage:storage(data),Date,Math,JSON,Number,Array,Object,Set,Uint8Array,
+    setInterval:()=>0,clearInterval:()=>{},setTimeout:()=>0};
   vm.runInNewContext(game,ctx,{filename:'game.js'});
   return window.Game;
 }
