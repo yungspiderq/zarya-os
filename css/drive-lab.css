@@ -1,0 +1,57 @@
+/* ZARYA OS 1.5: новые карточки железа, диагностика, виртуальная монтажная зона SSD */
+.pc-health { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:16px 0; }
+.pc-health > div { padding:13px 12px; background:var(--card); border:1px solid var(--stroke-2); border-radius:10px; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.pc-health span { font-size:11px; color:var(--text-2); line-height:1.4; }
+.pc-health strong { font-size:15px; overflow-wrap:anywhere; }
+.part-product-art[data-kind="board"] span { width:88px; height:85px; border-color:#a7d78a; background:linear-gradient(135deg,#2c6a4b,#0a413b); transform:rotate(-6deg); }
+.part-product-art[data-kind="psu"] span { width:94px; height:68px; border-radius:8px; border-color:#d4a3e9; background:linear-gradient(135deg,#56436c,#26283e); transform:rotate(3deg); }
+.part-product-art[data-kind="ssd"] span { width:132px; height:45px; border-radius:7px; border-color:#b6c9ed; background:linear-gradient(135deg,#395b88,#243958); transform:rotate(-4deg); }
+.dl-app { padding:22px; min-height:100%; }
+.dl-app .app-head { margin-bottom:16px; }
+.dl-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin-bottom:16px; }
+.dl-stats > div { padding:10px 12px; background:var(--card); border:1px solid var(--stroke); border-radius:10px; display:flex; flex-direction:column; gap:7px; min-width:0; }
+.dl-stats span { font-size:11px; color:var(--text-2); }
+.dl-stats b { font-size:13px; overflow-wrap:anywhere; }
+.dl-inventory { display:flex; flex-direction:column; gap:9px; }
+.dl-item { display:flex; flex-direction:column; align-items:flex-start; gap:5px; border:1px solid var(--stroke-2); background:var(--card); border-radius:10px; padding:13px 15px; text-align:left; }
+.dl-item:hover { border-color:var(--accent); background:var(--card-2); }
+.dl-item strong { font-size:14px; }
+.dl-item span { font-size:12px; color:var(--text-2); }
+.dl-item small { font-size:11px; color:var(--accent); }
+.dl-item.unfit small { color:#e59686; }
+.dl-scene { display:grid; grid-template-columns:minmax(0,1fr) 178px; gap:11px; min-height:299px; }
+.dl-motherboard { height:299px; position:relative; overflow:hidden; border-radius:12px; border:4px solid #296e63;
+ background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(75,140,126,.15) 28px,transparent 29px),repeating-linear-gradient(90deg,transparent 0 35px,rgba(65,153,121,.16) 36px,transparent 37px),linear-gradient(135deg,#123e36,#092724); }
+.dl-title { position:absolute; top:12px; left:13px; font-family:var(--mono); font-size:11px; color:#93dcbb; }
+.dl-pcb-lines { position:absolute; width:72%; height:70%; left:12%; top:17%; border:2px solid rgba(85,181,152,.3); border-radius:18px; }
+.dl-cpu { position:absolute; left:20%; top:27%; width:86px; height:86px; display:grid; place-items:center; color:#d2faff; background:linear-gradient(135deg,#405d66,#182d38); border:10px solid #93aaa9; border-radius:10px; font-family:var(--mono); font-weight:800; }
+.dl-ram { position:absolute; top:17%; right:12%; display:flex; gap:5px; height:120px; }
+.dl-ram i { display:block; width:9px; border:2px solid #93beab; background:#1a4739; border-radius:3px; }
+.dl-m2,.dl-sata,.dl-fit { position:absolute; color:#dff8f1; font-weight:700; font-size:11px; letter-spacing:.03em; border:2px solid #73b8ac; border-radius:6px; background:#195147; padding:9px 11px; }
+.dl-m2 { top:66%; left:11%; width:48%; }
+.dl-sata { top:68%; right:7%; width:22%; background:#34444a; border-color:#93b6bc; }
+.dl-fit { top:44%; left:48%; width:38%; z-index:3; display:none; border-color:#8ad7e8; background:#1a7990; }
+.dl-tools { display:flex; flex-direction:column; gap:10px; align-items:stretch; padding:12px; background:var(--card); border:1px solid var(--stroke-2); border-radius:12px; }
+.dl-power,.dl-fasten { border-radius:8px; border:1px solid var(--stroke-2); background:var(--card-2); padding:10px 6px; font-weight:650; font-size:12px; }
+.dl-power span { font-size:18px; line-height:1; }
+.dl-tray { display:flex; flex-direction:column; gap:10px; align-items:center; padding:12px 5px; border-radius:10px; border:1px dashed var(--stroke-2); background:var(--card); color:var(--text-2); min-height:132px; }
+.dl-tray small { line-height:1.4; font-size:11px; text-align:center; overflow-wrap:anywhere; }
+.dl-drive { width:110px; height:45px; display:grid; place-items:center; border:3px solid #8cc0d2; border-radius:7px; background:linear-gradient(135deg,#3e7092,#153d50); color:#e6fbff; font-family:var(--mono); font-weight:800; box-shadow:0 9px 20px rgba(0,0,0,.13); }
+.dl-scene[data-interface="M.2"] .dl-drive { width:94px; height:30px; border-color:#b5a7ee; border-radius:4px; background:linear-gradient(135deg,#555597,#293d71); }
+.dl-scene[data-interface="M.2"] .dl-m2,.dl-scene[data-interface="SATA"] .dl-sata { border-color:#82dcd5; }
+.dl-scene[data-stage="3"] .dl-fit { display:block; }
+.dl-scene[data-stage="4"] .dl-fit { display:block; opacity:.65; }
+.dl-scene[data-stage="5"] .dl-fit,.dl-scene[data-stage="6"] .dl-fit { display:block; background:#2b7d6f; border-color:#75e3b5; }
+.dl-scene[data-stage="6"] .dl-power { border-color:#77ddad; }
+.dl-scene button:not(:disabled):hover,.dl-item:hover { filter:brightness(1.15); }
+.dl-scene button:disabled { opacity:.55; cursor:default; }
+@media (max-width:650px) {
+ .pc-health { grid-template-columns:1fr; }
+ .dl-app { padding:14px; }
+ .dl-stats { grid-template-columns:1fr; }
+ .dl-scene { grid-template-columns:1fr; }
+ .dl-motherboard { height:255px; }
+ .dl-tools { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+ .dl-tray { grid-row:span 2; }
+ .dl-m2 { font-size:10px; }
+}
