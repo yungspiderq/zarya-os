@@ -35,7 +35,8 @@ try:
         page.wait_for_function("typeof window.WM !== 'undefined' && " +
                                "typeof window.Game.companyJobs === 'function' && " +
                                "typeof window.SaveCenterCore.makeBackup === 'function' && " +
-                               "typeof window.Game.proOffers === 'function'")
+                               "typeof window.Game.proOffers === 'function' && " +
+                               "typeof window.Game.opsCases === 'function'")
         assert page.evaluate("localStorage.getItem('zarya.reset.v2.1')") == "1"
         assert page.evaluate("window.Game.money()") == 0
         assert page.evaluate("window.Game.antiCheatStatus().protected") is True
@@ -67,6 +68,17 @@ try:
         assert page.locator(".pr-test-report").count() == 1
         page.screenshot(path=str(SCREENSHOTS / "professional-workshop.png"), full_page=True)
         page.evaluate("window.Game.proAbandon()")
+        page.evaluate("(window.WM.open('operations'), true)")
+        page.wait_for_selector(".ops-app")
+        assert page.locator(".ops-case").count() == 8
+        assert page.locator(".ops-detail > .btn").count() == 1
+        page.locator(".ops-detail > .btn").click()
+        assert page.locator(".ops-node").count() == 6
+        page.locator(".ops-node").first.click()
+        assert "event=" in page.locator(".ops-console-text").inner_text()
+        assert page.evaluate("window.Game.opsState().current.opened.length") == 1
+        assert page.evaluate("window.Game.opsCommand(['list']).msg.includes('op08')")
+        page.screenshot(path=str(SCREENSHOTS / "virtual-operations.png"), full_page=True)
         page.evaluate("""localStorage.setItem('zarya.settings.v2',
                            JSON.stringify({theme:'dark',accent:'blue'}))""")
         # A brand-new profile creates a main-game save before exporting an archive.
@@ -87,6 +99,7 @@ try:
             assert "zarya.game.v1" in content["data"]
             assert "zarya.company.v1" in content["data"]
             assert "zarya.pro-workshop.v1" in content["data"]
+            assert "zarya.ops.v1" in content["data"]
             page.locator('[data-save="file"]').set_input_files(str(exported))
             page.wait_for_selector(".sv-preview")
             assert page.locator('[data-save="restore"]').is_enabled()
