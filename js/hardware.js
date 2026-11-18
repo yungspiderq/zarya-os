@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const G = window.Game;
-  G.version = '2.0.0';
+  G.version = '2.1.0';
 
   const KEY = 'zarya.components.v2';
   const OLD_KEY = 'zarya.hardware.v1';
