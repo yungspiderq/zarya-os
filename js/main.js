@@ -311,6 +311,19 @@
     setTimeout(function () { boot.remove(); }, 600);
     tick();
     window.dispatchEvent(new Event('zarya:ready'));
+    if (window.ZaryaSeasonReset && window.ZaryaSeasonReset.performed) {
+      setTimeout(function () {
+        window.UI.toast('Новый сезон 2.1: старый прогресс сброшен один раз. Теперь начни с нуля.', 'ok');
+      }, 300);
+    }
+    if (window.ZaryaSeasonReset && window.ZaryaSeasonReset.failed) {
+      window.UI.toast('Ошибка сезонного сброса: проверь доступ к локальному хранилищу.', 'err');
+    }
+    if (window.Game.antiCheatStatus && window.Game.antiCheatStatus().detected) {
+      setTimeout(function () {
+        window.UI.toast('Обнаружено изменение сохранения. Прогресс сброшен из-за нарушения целостности.', 'err');
+      }, 500);
+    }
 
     let seen = '1';
     try { seen = localStorage.getItem('zarya.seen'); } catch (e) {}
