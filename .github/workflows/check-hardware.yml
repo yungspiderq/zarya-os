@@ -1,4 +1,4 @@
-name: Check Zarya OS hardware, service desk and benchmark
+name: Check Zarya OS hardware, services and PC build orders
 
 on:
   pull_request:
@@ -35,6 +35,8 @@ jobs:
         run: node tests/shop-scroll.test.cjs
       - name: Test service desk and benchmark
         run: node tests/service-center.test.cjs
+      - name: Test PC build orders
+        run: node tests/pc-orders.test.cjs
       - name: Check page integrations
         run: |
-          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css","js/service-center.js","css/service-center.css"])if(!x.includes(f+"?v=1.6.0"))throw Error("Missing cache-safe asset: "+f)'
+          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/drive-lab.js","js/main.js","css/components.css","css/drive-lab.css","js/service-center.js","css/service-center.css","js/pc-orders.js","css/pc-orders.css"])if(!x.includes(f+"?v=1.7.0"))throw Error("Missing cache-safe asset: "+f)'
