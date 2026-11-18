@@ -30,13 +30,24 @@
   if (!state.inspected || typeof state.inspected !== 'object' ||
       Array.isArray(state.inspected)) state.inspected = {};
   if (!state.refurb || typeof state.refurb !== 'object') state.refurb = null;
-  if (state.day !== day()) state = fresh();
+  if (state.day !== day()) {
+    state.day = day();
+    state.purchased = [];
+    state.inspected = {};
+  }
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     window.dispatchEvent(new CustomEvent('zarya:market'));
   }
   function getOffers() {
+    // Refresh listings even when the player keeps the browser tab open overnight.
+    if (state.day !== day()) {
+      state.day = day();
+      state.purchased = [];
+      state.inspected = {};
+      save();
+    }
     return categories.map(function (cat) {
       const stock = G.partsCatalog(cat[0]).filter(function (p) { return p.price > 0 && !p.builtin; });
       const index = hash(day() + ':' + cat[0]) % stock.length;
