@@ -64,6 +64,13 @@
     const HELP =
       'команды:\n' +
       '  help                      этот список\n' +
+      '  ops                       учебная сеть: операции и журналы\n' +
+      '  ops list / start <id>     список кейсов / начать кейс\n' +
+      '  ops inspect <узел>        изучить виртуальный журнал\n' +
+      '  ops marker <метка>        выбрать маркер событий\n' +
+      '  ops route <зона> <узел>   записать один переход\n' +
+      '  ops mode <режим>          выбрать форму заключения\n' +
+      '  ops submit               проверить собранную цепочку\n' +
       '  clear                     очистить экран\n' +
       '  net                       карта известных узлов\n' +
       '  scan <ip>                 просканировать узел\n' +
@@ -135,6 +142,12 @@
       const args = parts.slice(1);
       const G = window.Game;
 
+      if (cmd === 'ops' || cmd === 'operations') {
+        const result=G.opsCommand(args);
+        print(result.msg, result.ok ? (result.completed ? 'ok' : '') : 'err');
+        updateHud();
+        return;
+      }
       if (cmd === 'help') { print(HELP); return; }
       if (cmd === 'clear' || cmd === 'cls') { out.innerHTML = ''; return; }
       if (cmd === 'exit') { window.WM.close('terminal'); return; }
@@ -1227,7 +1240,7 @@
         '        <button type="button" class="btn btn--danger" data-act="reset-game">Начать заново</button>' +
         '      </div>' +
         '    </section>' +
-        '    <p class="set-foot">ЗАРЯ OS 2.1 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
+        '    <p class="set-foot">ЗАРЯ OS 2.2 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
         '  </div>' +
         '</div>'
       );

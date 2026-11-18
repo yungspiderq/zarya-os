@@ -5,7 +5,7 @@
     'zarya.seen','zarya.settings.v2','zarya.fs.v3','zarya.game.v1',
     'zarya.hardware.v1','zarya.components.v2',
     'zarya.service.v1','zarya.pc-orders.v1','zarya.cooling.v1',
-    'zarya.market.v1','zarya.company.v1','zarya.pro-workshop.v1'
+    'zarya.market.v1','zarya.company.v1','zarya.pro-workshop.v1','zarya.ops.v1'
   ];
   const MAX_FILE = 3 * 1024 * 1024;
   const MAX_VALUE = 2 * 1024 * 1024;
@@ -28,7 +28,7 @@
         if (raw !== null) records[key] = raw;
       });
       const backup = {
-        format: FORMAT, schema: 1, version: '2.1.0',
+        format: FORMAT, schema: 1, version: '2.2.0',
         exportedAt: new Date().toISOString(), data: records
       };
       const serialized = JSON.stringify(backup, null, 2);
@@ -78,6 +78,7 @@
           'zarya.components.v2': ['v', 2],
           'zarya.company.v1': ['v', 1],
           'zarya.pro-workshop.v1': ['v', 1],
+          'zarya.ops.v1': ['v', 1],
           'zarya.market.v1': ['v', 1],
           'zarya.service.v1': ['version', 1],
           'zarya.pc-orders.v1': ['version', 1],
