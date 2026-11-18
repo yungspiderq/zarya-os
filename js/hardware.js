@@ -8,9 +8,9 @@
   const OLD_KEY = 'zarya.hardware.v1';
   const PARTS = [
     { id: 'cpu0', type: 'cpu', name: 'Intel Celeron G5905', price: 0, power: 0, detail: '2 ядра · LGA1200', socket: 'LGA1200' },
-    { id: 'cpu1', type: 'cpu', name: 'Intel Core i3-10100F', price: 160, power: 1, detail: '4 ядра / 8 потоков · LGA1200', socket: 'LGA1200' },
-    { id: 'cpu2', type: 'cpu', name: 'Intel Core i5-10400F', price: 360, power: 2, detail: '6 ядер / 12 потоков · LGA1200', socket: 'LGA1200' },
-    { id: 'cpu3', type: 'cpu', name: 'Intel Core i7-10700F', price: 790, power: 3, detail: '8 ядер / 16 потоков · LGA1200', socket: 'LGA1200' },
+    { id: 'cpu1', type: 'cpu', name: 'Intel Core i3-10100', price: 160, power: 1, detail: '4 ядра / 8 потоков · LGA1200', socket: 'LGA1200' },
+    { id: 'cpu2', type: 'cpu', name: 'Intel Core i5-10400', price: 360, power: 2, detail: '6 ядер / 12 потоков · LGA1200', socket: 'LGA1200' },
+    { id: 'cpu3', type: 'cpu', name: 'Intel Core i7-10700', price: 790, power: 3, detail: '8 ядер / 16 потоков · LGA1200', socket: 'LGA1200' },
     { id: 'cpu4', type: 'cpu', name: 'Intel Core i9-10900K', price: 1650, power: 4, detail: '10 ядер / 20 потоков · LGA1200', socket: 'LGA1200' },
     { id: 'gpu0', type: 'gpu', name: 'Intel UHD Graphics 610', price: 0, power: 0, detail: 'Встроенная графика', builtin: true },
     { id: 'gpu1', type: 'gpu', name: 'NVIDIA GeForce GT 1030', price: 130, power: 1, detail: '2 ГБ видеопамяти' },
