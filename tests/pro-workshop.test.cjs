@@ -61,7 +61,7 @@ function finishQA(G){
 }
 (function testListingsAndInvalidOps(){
   const {G}=boot();
-  assert.equal(G.version,'2.1.0');
+  assert.equal(G.version,'2.2.0');
   const jobs=G.proOffers();
   assert.equal(jobs.length,3);
   assert.equal(jobs[0].kind,'repair');
