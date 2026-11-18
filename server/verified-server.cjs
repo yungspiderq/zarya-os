@@ -31,6 +31,11 @@ const TYPES = {'.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf
   '.js':'text/javascript; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg',
   '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.webp':'image/webp', '.ico':'image/x-icon',
   '.woff2':'font/woff2', '.json':'application/json; charset=utf-8'};
+const CATALOG = [
+  {id:'bronze',name:'Бронзовый сертификат аналитика',price:120},
+  {id:'silver',name:'Серебряный сертификат аналитика',price:480},
+  {id:'gold',name:'Золотой сертификат аналитика',price:1200}
+];
 const MAX_BODY = 4096;
 const LIMIT_PER_MINUTE = 100;
 const MAX_SESSIONS = 10000;
@@ -126,6 +131,7 @@ function publicState(session) {
   return {
     ok:true,verified:true,backend:'Zarya OS Server Wallet 2.2.1',
     verifiedBalance:session.balance,completed:session.completed.slice(),
+    catalog:CATALOG.map(c=>({...c})),owned:(session.owned||[]).slice(),
     cases:publicCases(session),active:publicActive(session.active),
     ledger:session.ledger.slice(-15).map(x=>({...x}))
   };
@@ -185,7 +191,7 @@ function sessionFor(req,res,db,persistDb,secureCookies) {
     if(Object.keys(db.sessions).length>=MAX_SESSIONS)
       return null;
     id=randomId();
-    session={created:Date.now(),balance:0,completed:[],ledger:[],active:null};
+    session={created:Date.now(),balance:0,completed:[],owned:[],ledger:[],active:null};
     db.sessions[id]=session;
     persistDb();
     const secure=secureCookies?'; Secure':'';
@@ -194,6 +200,19 @@ function sessionFor(req,res,db,persistDb,secureCookies) {
   return session;
 }
 function evaluate(session,action,input) {
+  if(action==='purchase') {
+    const item=typeof input.id==='string'&&CATALOG.find(c=>c.id===input.id);
+    if(!item)return error('unknown_item','Not a verified catalog item.',400);
+    if(!Array.isArray(session.owned))session.owned=[];
+    if(session.owned.includes(item.id))return error('already_owned','Certificate already owned.',409);
+    if(session.balance<item.price)return error('insufficient_credits','Not enough verified credits.',422);
+    // Server-fixed price and owned state; client price and localStorage are ignored.
+    session.balance-=item.price;
+    session.owned.push(item.id);
+    record(session,'purchase',null,item.id+' (-'+item.price+' credits)');
+    return {ok:true,item:item.id,verifiedBalance:session.balance,
+      message:'Certificate purchased using server credits.'};
+  }
   const a=session.active;
   if(action==='start'){
     const id=input.id;
@@ -303,7 +322,7 @@ function createVerifiedServer(options={}){
         if(!session)return json(res,503,error('capacity','Server session capacity reached.',503));
         if(pathname==='/api/verified/state'&&req.method==='GET')
           return json(res,200,publicState(session));
-        if(req.method==='POST'&&['start','inspect','report'].some(s=>pathname==='/api/verified/'+s)){
+        if(req.method==='POST'&&['start','inspect','report','purchase'].some(s=>pathname==='/api/verified/'+s)){
           const input=await requestBody(req);
           const action=pathname.slice('/api/verified/'.length);
           const result=evaluate(session,action,input);
