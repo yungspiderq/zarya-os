@@ -21,7 +21,7 @@
     window.removeEventListener('zarya:game', fn);
     window.removeEventListener('zarya:hardware', fn);
   }
-  const names = { cpu: 'Процессоры', gpu: 'Видеокарты', ram: 'Оперативная память', software: 'Программы' };
+  const names = { cpu: 'Процессоры', gpu: 'Видеокарты', ram: 'Оперативная память', board: 'Материнские платы', psu: 'Блоки питания', ssd: 'Накопители', software: 'Программы' };
   const icons = {
     cpu: '<rect x="6" y="6" width="20" height="20" rx="3" fill="#15344a" stroke="#5dd3ff" stroke-width="2"/><rect x="12" y="12" width="8" height="8" rx="1.5" fill="#5dd3ff"/><path d="M10 2v4m6-4v4m6-4v4M10 26v4m6-4v4m6-4v4M2 10h4m-4 6h4m-4 6h4m20-12h4m-4 6h4m-4 6h4" stroke="#5dd3ff" stroke-width="1.6"/>',
     shop: '<rect x="5" y="9" width="22" height="19" rx="3" fill="#11416b"/><path d="M10 11V8a6 6 0 0 1 12 0v3" fill="none" stroke="#8fdaff" stroke-width="2"/><path d="M10 18h12m-12 5h8" stroke="#8fdaff" stroke-width="2" stroke-linecap="round"/>'
@@ -79,12 +79,16 @@
         card.querySelector('.part-kicker').textContent = names[p.type];
         card.querySelector('.part-tag').textContent = installed ? 'УСТАНОВЛЕНО' : owned ? 'В ИНВЕНТАРЕ' : p.builtin ? 'ВСТРОЕНО' : 'НОВЫЙ';
         card.querySelector('.part-product-art').setAttribute('data-kind', p.type);
-        card.querySelector('.part-product-art span').textContent = p.type === 'cpu' ? 'CPU' : p.type === 'gpu' ? 'GPU' : 'DDR4';
+        card.querySelector('.part-product-art span').textContent = ({cpu:'CPU',gpu:'GPU',ram:'DDR4',board:'MB',psu:'PSU',ssd:'SSD'})[p.type];
         card.querySelector('h3').textContent = p.name;
         card.querySelector('.part-desc').textContent = p.detail;
         card.querySelector('.part-metadata').textContent =
-          p.type === 'cpu' ? 'Совместимость: LGA1200' :
-          p.type === 'ram' ? 'Модуль памяти DDR4' : 'Графический адаптер PCIe';
+          p.type === 'cpu' ? 'Сокет: LGA1200' :
+          p.type === 'ram' ? 'Оперативная память DDR4' :
+          p.type === 'board' ? 'Сокет: LGA1200 · M.2: ' + (p.m2 ? 'есть' : 'нет') :
+          p.type === 'psu' ? 'Мощность: ' + p.watts + ' Вт' :
+          p.type === 'ssd' ? 'Интерфейс: ' + p.interface + ' · до ' + p.mbps + ' МБ/с' :
+          'Графический адаптер PCIe';
         card.querySelector('.part-price').textContent = p.price ? money(p.price) : 'Стартовая деталь';
         const button = card.querySelector('button');
         button.textContent = installed ? 'В компьютере' : owned ? 'Перейти к установке' : p.builtin ? 'Встроено' : 'Купить';
@@ -94,6 +98,9 @@
             if (p.type === 'cpu') {
               window.CPUWorkbench.choose(p.id);
               api.open('workbench');
+            } else if (p.type === 'ssd') {
+              window.DriveWorkbench.choose(p.id);
+              api.open('drive-lab');
             } else api.open('pc');
           } else {
             notify(G.buyPart(p.id));
@@ -104,7 +111,7 @@
       });
       root.querySelector('[data-store="help"]').textContent =
         'Компоненты приобретаются поштучно: сначала в инвентарь, затем устанавливаются. ' +
-        'При покупке сперва тратятся аркадные кредиты, остаток — с баланса контрактов.';
+        'Для установки SSD есть отдельная мини-игра. Учитывай мощность БП и поддержку M.2 на материнской плате.';
     }
 
     function mount(openApi) {
@@ -115,7 +122,9 @@
         '<div class="parts-wallet"><b data-store="money"></b><small data-store="credits"></small></div></div>' +
         '<nav class="part-categories" aria-label="Разделы магазина">' +
         '<button data-store-cat="cpu" type="button">Процессоры</button><button data-store-cat="gpu" type="button">Видеокарты</button>' +
-        '<button data-store-cat="ram" type="button">ОЗУ</button><button data-store-cat="software" type="button">Программы</button></nav>' +
+        '<button data-store-cat="ram" type="button">ОЗУ</button><button data-store-cat="board" type="button">Мат. платы</button>' +
+        '<button data-store-cat="psu" type="button">Блоки питания</button><button data-store-cat="ssd" type="button">Накопители</button>' +
+        '<button data-store-cat="software" type="button">Программы</button></nav>' +
         '<div class="part-products" data-store="grid"></div><p class="muted parts-footnote" data-store="help"></p>' +
         '<div class="pc-actions"><button type="button" class="btn btn--primary" data-store="pc">Мой ПК и инвентарь</button>' +
         '<button type="button" class="btn" data-store="workbench">Мастерская CPU</button></div></div>'
@@ -149,11 +158,15 @@
       root.querySelector('[data-my="delay"]').textContent = perf.latency + ' мс';
       root.querySelector('[data-my="money"]').textContent = money(G.money());
       root.querySelector('[data-my="credits"]').textContent = G.hardwareCredits() + ' арк. ₡';
+      const health = G.systemHealth();
+      root.querySelector('[data-my="power"]').textContent = health.requiredWatts + ' / ' + health.suppliedWatts + ' Вт';
+      root.querySelector('[data-my="boot"]').textContent = health.bootSeconds + ' сек.';
+      root.querySelector('[data-my="speed"]').textContent = health.storageSpeed + ' МБ/с';
       root.querySelector('[data-my="meter"]').style.width = Math.min(100, perf.fps / 120 * 100) + '%';
 
       const installed = root.querySelector('[data-my="installed"]');
       installed.replaceChildren();
-      ['cpu', 'gpu', 'ram'].forEach(function (type) {
+      ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd'].forEach(function (type) {
         const p = G.installedPart(type);
         const card = el('<article class="my-part"><span class="part-kicker"></span><h3></h3><p class="muted"></p><span class="my-installed-badge">Установлено</span></article>');
         card.querySelector('.part-kicker').textContent = names[type];
@@ -178,11 +191,19 @@
         row.querySelector('h4').textContent = p.name;
         row.querySelector('p').textContent = p.detail;
         const button = row.querySelector('button');
-        button.textContent = p.type === 'cpu' ? 'Заменить CPU' : 'Установить';
+        button.textContent = p.type === 'cpu' ? 'Заменить CPU' : p.type === 'ssd' ? 'Монтаж SSD' : 'Установить';
+        const compatibility = G.partCompatibility(p.id);
+        if (!compatibility.ok) {
+          button.title = compatibility.msg;
+          row.querySelector('p').textContent = p.detail + ' · ' + compatibility.msg;
+        }
         button.addEventListener('click', function () {
           if (p.type === 'cpu') {
             window.CPUWorkbench.choose(p.id);
             api.open('workbench');
+          } else if (p.type === 'ssd') {
+            window.DriveWorkbench.choose(p.id);
+            api.open('drive-lab');
           } else notify(G.installPart(p.id));
         });
         inventory.appendChild(row);
@@ -198,11 +219,16 @@
         '<section class="pc-overview"><div><span class="pc-eyebrow">ИГРОВАЯ ПРОИЗВОДИТЕЛЬНОСТЬ</span>' +
         '<strong data-my="fps"></strong><p>Задержка ввода: <span data-my="delay"></span></p></div>' +
         '<div class="pc-chip-art" aria-hidden="true"><i></i><i></i><i></i><i></i></div></section>' +
-        '<div class="pc-fps-bar"><i data-my="meter"></i></div><h3 class="pc-section-title">Установлено в ПК</h3>' +
+        '<div class="pc-fps-bar"><i data-my="meter"></i></div>' +
+        '<div class="pc-health"><div><span>Потребление / мощность БП</span><strong data-my="power">—</strong></div>' +
+        '<div><span>Загрузка ЗАРЯ OS</span><strong data-my="boot">—</strong></div>' +
+        '<div><span>Скорость диска</span><strong data-my="speed">—</strong></div></div>' +
+        '<h3 class="pc-section-title">Установлено в ПК</h3>' +
         '<div class="pc-parts" data-my="installed"></div><div class="my-inventory-title"><h3 class="pc-section-title">Мои комплектующие</h3>' +
         '<span data-my="count"></span></div><div class="my-inventory" data-my="inventory"></div>' +
         '<div class="pc-actions"><button type="button" class="btn btn--primary" data-my="shop">Магазин комплектующих</button>' +
         '<button type="button" class="btn" data-my="workbench">Заменить процессор</button>' +
+        '<button type="button" class="btn" data-my="drive">Монтаж SSD</button>' +
         '<button type="button" class="btn" data-my="arcade">Аркада</button></div>' +
         '<p class="muted pc-disclaimer">Это игровой компьютер: показатели FPS и задержки условные. ' +
         'Материнская плата в симуляции использует сокет LGA1200 и память DDR4.</p></div>'
@@ -211,6 +237,7 @@
       root.querySelector('[data-my="shop"]').addEventListener('click', function () { api.open('shop'); });
       root.querySelector('[data-my="workbench"]').addEventListener('click', function () { api.open('workbench'); });
       root.querySelector('[data-my="arcade"]').addEventListener('click', function () { api.open('arcade'); });
+      root.querySelector('[data-my="drive"]').addEventListener('click', function () { api.open('drive-lab'); });
       update = render;
       listen(update);
       render();
