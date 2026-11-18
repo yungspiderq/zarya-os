@@ -512,7 +512,9 @@
       caughtCount: 0,
       earned: 0,
       servicePaid: [],
-      buildPaid: []
+      buildPaid: [],
+      companyPaid: [],
+      companyAwardsPaid: []
     };
   }
 
@@ -663,6 +665,32 @@
     caughtCount: function () { return st.caughtCount; },
     started: function () { return st.started; },
     earned: function () { return st.earned; },
+    awardCompanyJob: function (id, amount) {
+      if (typeof id !== 'string' || !/^co-[0-9]{6}$/.test(id) ||
+          !Number.isSafeInteger(amount) || amount < 1 || amount > 2500) {
+        return { ok: false, msg: 'Некорректная выплата мастерской.' };
+      }
+      if (!Array.isArray(st.companyPaid)) st.companyPaid = [];
+      if (st.companyPaid.includes(id)) return { ok: false, alreadyPaid: true, msg: 'Этот контракт уже оплачен.' };
+      st.companyPaid.push(id);
+      st.money += amount;
+      st.earned += amount;
+      save();
+      return { ok: true, reward: amount, msg: '+' + amount + ' ₡ за контракт мастерской.' };
+    },
+    awardCompanyAchievement: function (id, amount) {
+      if (typeof id !== 'string' || !/^ach-[a-z0-9-]{2,40}$/.test(id) ||
+          !Number.isSafeInteger(amount) || amount < 1 || amount > 500) {
+        return { ok: false, msg: 'Некорректная награда достижения.' };
+      }
+      if (!Array.isArray(st.companyAwardsPaid)) st.companyAwardsPaid = [];
+      if (st.companyAwardsPaid.includes(id)) return { ok: false, alreadyPaid: true, msg: 'Награда уже получена.' };
+      st.companyAwardsPaid.push(id);
+      st.money += amount;
+      st.earned += amount;
+      save();
+      return { ok: true, reward: amount, msg: '+' + amount + ' ₡ за достижение.' };
+    },
     creditMarketSale: function (amount) {
       if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1500) {
         return { ok: false, msg: 'Некорректная сумма продажи.' };
