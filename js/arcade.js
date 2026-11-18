@@ -22,7 +22,7 @@
       const perf = G.performance();
       root.querySelector('[data-pc="fps"]').textContent = perf.fps + ' FPS';
       root.querySelector('[data-pc="status"]').textContent = perf.tier;
-      root.querySelector('[data-pc="balance"]').textContent = money(G.money());
+      root.querySelector('[data-pc="balance"]').textContent = money(G.money()) + ' · ' + G.hardwareCredits() + ' арк. кр.';
       root.querySelector('[data-pc="meter"]').style.width = Math.round(perf.fps / 120 * 100) + '%';
       root.querySelector('[data-pc="warning"]').textContent = perf.fps < 35
         ? 'Слабое железо: в Аркаде будут заметны пропуски кадров и задержка реакции.'
@@ -49,7 +49,7 @@
         card.querySelector('.pc-part-next').textContent = done
           ? 'Лучший доступный компонент установлен.'
           : 'Следующий: ' + item.levels[lvl + 1];
-        card.querySelector('.pc-part-price').textContent = done ? 'Максимум' : money(item.costs[lvl]);
+        card.querySelector('.pc-part-price').textContent = done ? 'Максимум' : item.id === 'cpu' ? money(item.costs[lvl]) : item.costs[lvl] + ' арк. кр.';
         const btn = card.querySelector('button');
         btn.textContent = done ? 'Установлено' : 'Купить';
         btn.disabled = done;
@@ -66,7 +66,7 @@
       root = make(
         '<div class="app pc-app">' +
         ' <div class="app-head"><div><h2>Мой компьютер</h2><p class="muted">Виртуальный ПК · реальные названия комплектующих</p></div>' +
-        ' <div class="balance"><span>Баланс</span><b data-pc="balance"></b></div></div>' +
+        ' <div class="balance"><span>Деньги / Аркада</span><b data-pc="balance"></b></div></div>' +
         ' <section class="pc-overview"><div><span class="pc-eyebrow">ИГРОВОЙ БЕНЧМАРК</span>' +
         ' <strong data-pc="fps"></strong><p data-pc="status"></p></div>' +
         ' <div class="pc-chip-art" aria-hidden="true"><i></i><i></i><i></i><i></i></div></section>' +
@@ -85,11 +85,15 @@
       root.querySelector('[data-pc="shop"]').addEventListener('click', function () { api.open('shop'); });
       refresh = render;
       window.addEventListener('zarya:game', refresh);
+      window.addEventListener('zarya:hardware', refresh);
       render();
     }
 
     function close() {
-      if (refresh) window.removeEventListener('zarya:game', refresh);
+      if (refresh) {
+        window.removeEventListener('zarya:game', refresh);
+        window.removeEventListener('zarya:hardware', refresh);
+      }
       refresh = null;
       root = null;
     }
@@ -322,7 +326,7 @@
       api = openApi;
       root = make(
         '<div class="app arcade-app">' +
-        ' <div class="app-head"><div><h2>Аркада</h2><p class="muted">Локальные мини-игры · заработай кредиты на железо</p></div>' +
+        ' <div class="app-head"><div><h2>Аркада</h2><p class="muted">Локальные мини-игры · зарабатывай аркадные кредиты на GPU и ОЗУ</p></div>' +
         ' <button type="button" class="btn" data-arcade="pc">Мой ПК</button></div>' +
         ' <div class="arcade-picker"><button type="button" data-game="snake">Пиксельная змейка</button>' +
         ' <button type="button" data-game="reaction">Тест реакции</button></div>' +
@@ -337,7 +341,7 @@
         ' <div class="pc-actions"><button type="button" class="btn btn--primary" data-arcade="restart">Начать заново</button>' +
         ' <button type="button" class="btn" data-arcade="stop">Остановить</button></div>' +
         ' <p class="muted arcade-footer">При слабой видеокарте симулируются пропуски кадров, а при слабом CPU и ОЗУ — задержка отклика. ' +
-        'Награда зависит от очков; между выплатами в каждой игре действует пауза 60 секунд.</p>' +
+        'Награда в аркадных кредитах зависит от очков; между выплатами в каждой игре действует пауза 60 секунд.</p>' +
         '</div>'
       );
       api.body.appendChild(root);
