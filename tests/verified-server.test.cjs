@@ -55,7 +55,7 @@ async function run(){
   try{
     const index=await fetch(base+'/');
     assert.equal(index.status,200);
-    assert.match(await index.text(),/ZАРЯ/);
+    assert.match(await index.text(),/ЗАРЯ/);
     const forbidden=await req('/server/verified-server.cjs');
     assert.equal(forbidden.status,404,'server source not published as static');
     const apiHealth=await clean('/api/verified/health');
