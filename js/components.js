@@ -117,7 +117,7 @@
       });
       root.querySelector('[data-store="help"]').textContent =
         'Компоненты приобретаются поштучно: сначала в инвентарь, затем устанавливаются. ' +
-        'Для SSD и кулера есть отдельные мини-игры. Проверяй мощность БП и поддержку M.2 на материнской плате.';
+        'Для SSD и кулера есть отдельные мини-игры. Б/у компоненты и перепродажа доступны в «Техно-барахолке».';
     }
 
     function mount(openApi) {
@@ -134,7 +134,8 @@
         '<button data-store-cat="software" type="button">Программы</button></nav>' +
         '<div class="part-products" data-store="grid"></div><p class="muted parts-footnote" data-store="help"></p>' +
         '<div class="pc-actions"><button type="button" class="btn btn--primary" data-store="pc">Мой ПК и инвентарь</button>' +
-        '<button type="button" class="btn" data-store="workbench">Мастерская CPU</button></div></div>'
+        '<button type="button" class="btn" data-store="workbench">Мастерская CPU</button>' +
+        '<button type="button" class="btn" data-store="market">Техно-барахолка</button></div></div>'
       );
       api.body.appendChild(root);
       root.querySelectorAll('[data-store-cat]').forEach(function (button) {
@@ -145,6 +146,7 @@
       });
       root.querySelector('[data-store="pc"]').addEventListener('click', function () { api.open('pc'); });
       root.querySelector('[data-store="workbench"]').addEventListener('click', function () { api.open('workbench'); });
+      root.querySelector('[data-store="market"]').addEventListener('click', function () { api.open('flea-market'); });
       update = render;
       listen(update);
       render();
@@ -181,7 +183,9 @@
         const card = el('<article class="my-part"><span class="part-kicker"></span><h3></h3><p class="muted"></p><span class="my-installed-badge">Установлено</span></article>');
         card.querySelector('.part-kicker').textContent = names[type];
         card.querySelector('h3').textContent = p.name;
-        card.querySelector('p').textContent = p.detail;
+        const used = G.marketCondition(p.id);
+        card.querySelector('p').textContent = p.detail + (used ? ' · Б/У ' + used.condition + '%' : '');
+        card.querySelector('.my-installed-badge').textContent = used ? 'Б/У · ' + used.condition + '%' : 'Установлено';
         installed.appendChild(card);
       });
 
@@ -199,13 +203,14 @@
         );
         row.querySelector('.part-kicker').textContent = names[p.type];
         row.querySelector('h4').textContent = p.name;
-        row.querySelector('p').textContent = p.detail;
+        const used = G.marketCondition(p.id);
+        row.querySelector('p').textContent = p.detail + (used ? ' · Б/У ' + used.condition + '%' : '');
         const button = row.querySelector('button');
         button.textContent = p.type === 'cpu' ? 'Заменить CPU' : p.type === 'ssd' ? 'Монтаж SSD' : p.type === 'cooler' ? 'Заменить кулер' : 'Установить';
         const compatibility = G.partCompatibility(p.id);
         if (!compatibility.ok) {
           button.title = compatibility.msg;
-          row.querySelector('p').textContent = p.detail + ' · ' + compatibility.msg;
+          row.querySelector('p').textContent = p.detail + (used ? ' · Б/У ' + used.condition + '%' : '') + ' · ' + compatibility.msg;
         }
         button.addEventListener('click', function () {
           if (p.type === 'cpu') {
@@ -246,6 +251,7 @@
         '<button type="button" class="btn" data-my="drive">Монтаж SSD</button>' +
         '<button type="button" class="btn" data-my="benchmark">Запустить бенчмарк</button>' +
         '<button type="button" class="btn" data-my="cooling">Охлаждение ПК</button>' +
+        '<button type="button" class="btn" data-my="market">Техно-барахолка</button>' +
         '<button type="button" class="btn" data-my="service">Сервисный центр</button>' +
         '<button type="button" class="btn" data-my="orders">Сборка на заказ</button>' +
         '<button type="button" class="btn" data-my="arcade">Аркада</button></div>' +
@@ -258,6 +264,7 @@
       root.querySelector('[data-my="arcade"]').addEventListener('click', function () { api.open('arcade'); });
       root.querySelector('[data-my="benchmark"]').addEventListener('click', function () { api.open('benchmark'); });
       root.querySelector('[data-my="cooling"]').addEventListener('click', function () { api.open('cooling'); });
+      root.querySelector('[data-my="market"]').addEventListener('click', function () { api.open('flea-market'); });
       root.querySelector('[data-my="service"]').addEventListener('click', function () { api.open('service'); });
       root.querySelector('[data-my="orders"]').addEventListener('click', function () { api.open('pc-orders'); });
       root.querySelector('[data-my="drive"]').addEventListener('click', function () { api.open('drive-lab'); });
