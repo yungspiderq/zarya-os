@@ -1,6 +1,8 @@
 /* ЗАРЯ OS — ядро игры «хакер-симулятор»: сеть, взлом, заказы, деньги, след. */
 (function () {
   const KEY = 'zarya.game.v1';
+  const GUARD_KEY = 'zarya.game.guard.v2.1';
+  let cheatDetected = false;
 
   /* ——— узлы сети ——— */
   const SERVERS = [
@@ -522,18 +524,86 @@
   let st = fresh();
   let session = null; /* { ip, user, authed } — живёт только в памяти */
 
+  // Local-only integrity check: deters easy JSON editing, NOT a server-authoritative
+  // anti-cheat. People who control JavaScript/devtools can still bypass client checks.
+  function checksum(raw, salt) {
+    const text = salt + ':' + raw + ':zarya-2.1';
+    let hash = 2166136261;
+    for (let i=0; i<text.length; i++) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(16).padStart(8, '0');
+  }
+  function validEconomy(data) {
+    if (!data || data.v !== 1 ||
+        !Number.isSafeInteger(data.money) || data.money < 0 || data.money > 1000000000 ||
+        !Number.isSafeInteger(data.earned) || data.earned < 0 || data.earned > 1000000000 ||
+        !Number.isSafeInteger(data.rep) || data.rep < 0 || data.rep > 1000000) return false;
+    const groups = [
+      ['companyPaid', /^co-[0-9]{6}$/],
+      ['companyAwardsPaid', /^ach-[a-z0-9-]{2,40}$/],
+      ['proPaid', /^pro-[0-9]{6}$/],
+      ['buildPaid', /^build-[0-9]{2}$/],
+      ['servicePaid', /^svc-[0-9]{2}$/]
+    ];
+    return groups.every(function (entry) {
+      const ids = data[entry[0]];
+      return Array.isArray(ids) && ids.length <= 100000 &&
+        new Set(ids).size === ids.length &&
+        ids.every(id => typeof id === 'string' && entry[1].test(id));
+    });
+  }
+  function resetTamperedProgress() {
+    const keys = [];
+    for (let i=0; i<localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('zarya.') && key !== 'zarya.reset.v2.1') keys.push(key);
+    }
+    keys.forEach(key => localStorage.removeItem(key));
+    st = fresh();
+  }
+  let guardSalt = null;
   try {
     const raw = localStorage.getItem(KEY);
+    const sealed = localStorage.getItem(GUARD_KEY);
     if (raw) {
-      const data = JSON.parse(raw);
-      if (data && data.v === 1) st = Object.assign(fresh(), data);
+      const parsed = JSON.parse(raw);
+      const seal = sealed && JSON.parse(sealed);
+      if (!seal || typeof seal.salt !== 'string' || !/^[0-9a-f]{32}$/.test(seal.salt) ||
+          seal.hash !== checksum(raw,seal.salt) || !validEconomy(parsed)) {
+        cheatDetected = true;
+        resetTamperedProgress();
+      } else {
+        guardSalt = seal.salt;
+        st = Object.assign(fresh(),parsed);
+      }
+    } else if (sealed) {
+      cheatDetected = true;
+      resetTamperedProgress();
     }
-  } catch (e) { /* сохранение недоступно — играем без него */ }
+  } catch (error) {
+    cheatDetected = true;
+    try { resetTamperedProgress(); } catch (e) {}
+  }
 
+  function generateSalt() {
+    const values = new Uint8Array(16);
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function')
+      crypto.getRandomValues(values);
+    else for (let i=0; i<values.length; i++) values[i] = Math.floor(Math.random()*256);
+    return Array.from(values,b=>b.toString(16).padStart(2,'0')).join('');
+  }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+    try {
+      if (!guardSalt) guardSalt = generateSalt();
+      const raw=JSON.stringify(st);
+      localStorage.setItem(KEY,raw);
+      localStorage.setItem(GUARD_KEY,JSON.stringify({salt:guardSalt,hash:checksum(raw,guardSalt)}));
+    } catch (e) {}
     window.dispatchEvent(new CustomEvent('zarya:game'));
   }
+
 
   function server(ip) {
     return SERVERS.find(function (s) { return s.ip === ip; }) || null;
@@ -666,6 +736,7 @@
     caughtCount: function () { return st.caughtCount; },
     started: function () { return st.started; },
     earned: function () { return st.earned; },
+    antiCheatStatus: function () { return { detected: cheatDetected, protected: true, serverVerified: false }; },
     awardCompanyJob: function (id, amount) {
       if (typeof id !== 'string' || !/^co-[0-9]{6}$/.test(id) ||
           !Number.isSafeInteger(amount) || amount < 1 || amount > 2500) {
@@ -1072,4 +1143,6 @@
   };
 
   window.Game = Game;
+  // Initialize an integrity-sealed save even on the first visit.
+  save();
 })();
