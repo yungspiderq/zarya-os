@@ -24,6 +24,7 @@ function boot(opts={}){
   return {Core:window.SaveCenterCore,data,window};
 }
 const initial=new Map([
+  ['zarya.seen','1'],
   ['zarya.settings.v2',JSON.stringify({theme:'dark',accent:'blue'})],
   ['zarya.fs.v3',JSON.stringify({nodes:[],notes:{}})],
   ['zarya.game.v1',JSON.stringify({v:1,money:400,rep:2})],
@@ -34,18 +35,22 @@ const initial=new Map([
 (function testBackupExportAndValidation(){
   const {Core,data,window}=boot({data:new Map(initial)});
   assert.ok(window.APPS['save-center']);
-  assert.equal(Core.getSummary().count,5);
+  assert.equal(Core.getSummary().count,6);
   const blob=Core.makeBackup();
   const json=JSON.parse(blob);
   assert.equal(json.format,'zarya-os-save');
   assert.equal(json.schema,1);
   assert.equal(json.version,'2.0.0');
-  assert.equal(Object.keys(json.data).length,5);
+  assert.equal(Object.keys(json.data).length,6);
   assert.equal(json.data['not-zarya-account'],undefined,'unrelated storage cannot leak into export');
+  assert.equal(json.data['zarya.seen'],'1','welcome state is included');
   const validated=Core.validate(blob);
   assert.equal(validated.ok,true);
-  assert.equal(validated.count,5);
+  assert.equal(validated.count,6);
   assert.equal(validated.data['zarya.game.v1'],data.get('zarya.game.v1'));
+  const invalidWelcome=JSON.parse(blob);
+  invalidWelcome.data['zarya.seen']='unexpected';
+  assert.equal(Core.validate(JSON.stringify(invalidWelcome)).ok,false,'invalid welcome flag rejected');
   assert.equal(Core.validate('{').ok,false,'bad JSON rejected');
   assert.equal(Core.validate('').ok,false,'blank file rejected');
   assert.equal(Core.validate('x'.repeat(3*1024*1024+1)).ok,false,'oversize rejected');
@@ -73,7 +78,7 @@ const initial=new Map([
   assert.equal(data.get('zarya.game.v1'),baseline.get('zarya.game.v1'));
   assert.equal(data.has('zarya.market.v1'),false,'old game sections not present in backup are replaced');
   assert.equal(data.get('not-zarya-account'),JSON.stringify({secret:'keep this'}), 'unrelated browser data stays untouched');
-  assert.equal(target.Core.getSummary().count,5);
+  assert.equal(target.Core.getSummary().count,6);
 })();
 (function testWriteFailureRollsBack(){
   const data=new Map(initial);
