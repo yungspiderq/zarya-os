@@ -510,7 +510,8 @@
       decrypted: [],
       started: Date.now(),
       caughtCount: 0,
-      earned: 0
+      earned: 0,
+      servicePaid: []
     };
   }
 
@@ -661,6 +662,20 @@
     caughtCount: function () { return st.caughtCount; },
     started: function () { return st.started; },
     earned: function () { return st.earned; },
+    awardServiceContract: function (id, amount) {
+      // Stored in the main campaign save to avoid paying the same service job twice.
+      if (typeof id !== 'string' || !/^svc-[0-9]{2}$/.test(id) ||
+          !Number.isSafeInteger(amount) || amount < 1 || amount > 600) {
+        return { ok: false, msg: 'Некорректная сервисная выплата.' };
+      }
+      if (!Array.isArray(st.servicePaid)) st.servicePaid = [];
+      if (st.servicePaid.includes(id)) return { ok: false, alreadyPaid: true, msg: 'Награда за заказ уже выплачена.' };
+      st.servicePaid.push(id);
+      st.money += amount;
+      st.earned += amount;
+      save();
+      return { ok: true, reward: amount, msg: 'Заказ выполнен: +' + amount + ' ₡ на баланс.' };
+    },
     level: function (id) { return st[id] || 0; },
     shop: function () { return SHOP; },
     hideCost: HIDE_COST,
