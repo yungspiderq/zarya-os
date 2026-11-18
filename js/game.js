@@ -785,7 +785,7 @@
       if (!session) return Promise.resolve({ ok: false, msg: 'Сначала connect <ip>.' });
       if (session.authed) return Promise.resolve({ ok: false, msg: 'Доступ уже получен.' });
       const s = server(session.ip);
-      const speed = 1 + st.cpu * 0.45;
+      const speed = 1 + Game.level('cpu') * 0.45;
       const total = (2200 + s.sec * 1250) / speed;
       const target = session.ip;
       let passed = 0;
@@ -936,6 +936,15 @@
       st.trace = 0;
       save();
       return { ok: true, msg: 'маршрут перестроен, след сброшен (−' + HIDE_COST + ' ₡)' };
+    },
+
+    spendFunds: function (amount) {
+      const cost = Number(amount);
+      if (!Number.isSafeInteger(cost) || cost < 0) return { ok: false, msg: 'Некорректная цена.' };
+      if (st.money < cost) return { ok: false, msg: 'Недостаточно средств: требуется ' + cost + ' ₡.' };
+      st.money -= cost;
+      save();
+      return { ok: true, msg: 'Оплачено ' + cost + ' ₡.' };
     },
 
     buy: function (id) {
