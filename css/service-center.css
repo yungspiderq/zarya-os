@@ -1,0 +1,70 @@
+/* ЗАРЯ OS 1.6 — сервисный центр и виртуальный бенчмарк */
+.svc-app,.bench-app { height:100%; min-height:0; overflow-y:auto; overflow-x:hidden; padding:20px 23px 24px; overscroll-behavior:contain; scrollbar-gutter:stable; }
+.svc-app .app-head,.bench-app .app-head { margin-bottom:18px; flex:0 0 auto; }
+.svc-summary { display:flex; flex-direction:column; align-items:flex-end; gap:4px; white-space:nowrap; }
+.svc-summary b { color:var(--accent); font-size:17px; }
+.svc-summary span { font-size:12px; color:var(--text-2); }
+.svc-columns { display:grid; grid-template-columns:minmax(220px,34%) minmax(0,1fr); align-items:stretch; gap:14px; flex:1; min-height:360px; }
+.svc-tickets { display:flex; flex-direction:column; gap:8px; padding-right:5px; overflow-y:auto; min-height:0; max-height:100%; }
+.svc-ticket { text-align:left; display:flex; flex-direction:column; gap:7px; background:var(--card); color:var(--text); border:1px solid var(--stroke-2); border-radius:10px; padding:13px; min-width:0; transition:background .12s,border-color .12s; }
+.svc-ticket:hover { background:var(--card-2); }
+.svc-ticket.selected { border-color:var(--accent); box-shadow:inset 3px 0 var(--accent); }
+.svc-ticket.is-done { opacity:.8; }
+.svc-ticket-num { font-size:10px; color:var(--accent); font-weight:700; letter-spacing:.04em; }
+.svc-ticket strong { font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
+.svc-ticket small { font-size:11px; color:var(--text-2); overflow-wrap:anywhere; }
+.svc-detail-scroll { min-width:0; min-height:0; background:var(--card); border:1px solid var(--stroke-2); border-radius:12px; overflow-y:auto; }
+.svc-detail { padding:21px; }
+.svc-detail h3 { font-size:19px; line-height:1.35; margin:7px 0 13px; overflow-wrap:anywhere; }
+.svc-symptom { font-size:14px; line-height:1.6; color:var(--text); margin-bottom:16px; }
+.svc-evidence { border-radius:10px; border:1px solid var(--stroke); overflow:hidden; background:var(--card-2); margin-bottom:15px; }
+.svc-evidence-line { position:relative; padding:10px 12px 10px 26px; color:var(--text-2); font-size:12px; line-height:1.45; border-bottom:1px solid var(--stroke); overflow-wrap:anywhere; }
+.svc-evidence-line:last-child { border-bottom:0; }
+.svc-evidence-line::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); position:absolute; left:12px; top:16px; }
+.svc-actions { display:flex; flex-direction:column; gap:9px; }
+.svc-actions > .btn { align-self:flex-start; border:1px solid var(--stroke-2); padding:10px 14px; border-radius:7px; }
+.svc-stage-heading { font-size:13px; margin:6px 0; font-weight:700; }
+.svc-option { padding:12px 14px; border:1px solid var(--stroke-2); background:var(--card-2); border-radius:8px; text-align:left; font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
+.svc-option:hover,.svc-option:focus-visible { border-color:var(--accent); background:var(--sel); }
+.svc-cancel { margin-top:5px; color:var(--text-2); }
+.svc-hint { color:var(--text-2); margin-top:14px; font-size:12px; line-height:1.55; min-height:17px; }
+.svc-complete { padding:13px; border-left:3px solid var(--accent); background:var(--card-2); color:var(--text); border-radius:6px; line-height:1.55; }
+.svc-note { font-size:11px; line-height:1.5; margin-top:12px; flex:0 0 auto; }
+.bench-modes { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; }
+.bench-modes button { background:var(--card); border:1px solid var(--stroke-2); color:var(--text-2); padding:10px 14px; border-radius:8px; font-weight:600; }
+.bench-modes button.active { border-color:var(--accent); color:var(--accent); background:var(--card-2); }
+.bench-hero { padding:22px 25px; background:linear-gradient(115deg,var(--card-2),var(--card)); border:1px solid var(--stroke-2); border-radius:13px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.bench-hero > div:first-child { display:flex; flex-direction:column; gap:6px; }
+.bench-hero span { color:var(--text-2); font-weight:700; font-size:11px; letter-spacing:.11em; }
+.bench-hero strong { font-size:48px; line-height:1.2; color:var(--accent); letter-spacing:-.03em; }
+.bench-hero small { font-size:12px; color:var(--text-2); }
+.bench-icon { width:94px; height:92px; display:flex; align-items:flex-end; justify-content:center; gap:9px; transform:skew(-10deg); }
+.bench-icon span { display:block; width:15px; background:var(--accent); opacity:.7; border-radius:4px 4px 0 0; }
+.bench-icon span:nth-child(1) { height:30px; }
+.bench-icon span:nth-child(2) { height:60px; }
+.bench-icon span:nth-child(3) { height:42px; }
+.bench-icon span:nth-child(4) { height:79px; }
+.bench-progress { overflow:hidden; height:8px; margin:16px 0 8px; background:var(--stroke-2); border-radius:10px; }
+.bench-progress i { display:block; height:100%; width:0; background:var(--accent); transition:width .04s linear; }
+.bench-progress-meta { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; color:var(--text-2); font-size:12px; min-height:39px; line-height:1.5; }
+.bench-progress-meta b { color:var(--accent); white-space:nowrap; }
+.bench-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+.bench-metrics > div { background:var(--card); border:1px solid var(--stroke); border-radius:9px; display:flex; flex-direction:column; gap:7px; padding:13px; min-width:0; }
+.bench-metrics span { font-size:11px; line-height:1.35; color:var(--text-2); }
+.bench-metrics strong { font-size:16px; font-weight:700; overflow-wrap:anywhere; }
+.bench-app .pc-actions { margin-top:17px; }
+.bench-footnote { font-size:11px; line-height:1.55; margin-top:14px; }
+@media (max-width:680px) {
+ .svc-app,.bench-app { padding:13px; }
+ .svc-columns { grid-template-columns:1fr; gap:11px; flex:initial; }
+ .svc-tickets { max-height:170px; }
+ .svc-detail-scroll { max-height:360px; }
+ .svc-detail { padding:15px; }
+ .bench-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .bench-hero strong { font-size:36px; }
+}
+@media (max-width:400px) {
+ .bench-metrics { grid-template-columns:1fr; }
+ .svc-summary { font-size:11px; }
+ .bench-icon { width:60px; height:65px; }
+}
