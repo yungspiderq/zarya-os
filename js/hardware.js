@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const G = window.Game;
-  G.version = '1.7.0';
+  G.version = '1.8.0';
 
   const KEY = 'zarya.components.v2';
   const OLD_KEY = 'zarya.hardware.v1';
@@ -35,7 +35,12 @@
     { id: 'ssd1', type: 'ssd', name: 'Kingston A400 480GB', price: 145, power: 1, detail: 'SSD · 480 ГБ · SATA', interface: 'SATA', mbps: 450 },
     { id: 'ssd2', type: 'ssd', name: 'Samsung 870 EVO 1TB', price: 385, power: 2, detail: 'SSD · 1 ТБ · SATA', interface: 'SATA', mbps: 560 },
     { id: 'ssd3', type: 'ssd', name: 'WD Blue SN570 1TB', price: 645, power: 3, detail: 'NVMe · 1 ТБ · M.2', interface: 'M.2', mbps: 3000 },
-    { id: 'ssd4', type: 'ssd', name: 'Samsung 970 EVO Plus 2TB', price: 1050, power: 4, detail: 'NVMe · 2 ТБ · M.2', interface: 'M.2', mbps: 3500 }
+    { id: 'ssd4', type: 'ssd', name: 'Samsung 970 EVO Plus 2TB', price: 1050, power: 4, detail: 'NVMe · 2 ТБ · M.2', interface: 'M.2', mbps: 3500 },
+    { id: 'cooler0', type: 'cooler', name: 'Intel Stock Cooler', price: 0, power: 0, detail: 'Базовое охлаждение · LGA1200', socket: 'LGA1200' },
+    { id: 'cooler1', type: 'cooler', name: 'DeepCool AG400', price: 130, power: 1, detail: 'Башенный кулер · LGA1200', socket: 'LGA1200' },
+    { id: 'cooler2', type: 'cooler', name: 'ARCTIC Freezer 34 eSports DUO', price: 260, power: 2, detail: 'Два вентилятора · LGA1200', socket: 'LGA1200' },
+    { id: 'cooler3', type: 'cooler', name: 'be quiet! Pure Rock 2', price: 445, power: 3, detail: 'Тихий башенный кулер · LGA1200', socket: 'LGA1200' },
+    { id: 'cooler4', type: 'cooler', name: 'Noctua NH-U12S', price: 710, power: 4, detail: 'Эффективный кулер · LGA1200', socket: 'LGA1200' }
   ];
 
   const original = {
@@ -46,12 +51,12 @@
   };
 
   function part(id) { return PARTS.find(function (p) { return p.id === id; }) || null; }
-  function validType(type) { return ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd'].includes(type); }
+  function validType(type) { return ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd', 'cooler'].includes(type); }
   function clampLevel(level) { return Math.max(0, Math.min(4, Math.floor(Number(level) || 0))); }
   function fresh() {
     return {
       v: 2,
-      installed: { cpu: 'cpu0', gpu: 'gpu0', ram: 'ram0', board: 'board0', psu: 'psu0', ssd: 'ssd0' },
+      installed: { cpu: 'cpu0', gpu: 'gpu0', ram: 'ram0', board: 'board0', psu: 'psu0', ssd: 'ssd0', cooler: 'cooler0' },
       inventory: [],
       credits: 0,
       best: {},
@@ -83,7 +88,7 @@
   if (!state) state = migrate();
 
   // Не доверяем устаревшим, дублированным и случайно испорченным ID в сохранении.
-  ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd'].forEach(function (type) {
+  ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd', 'cooler'].forEach(function (type) {
     if (!part(state.installed[type]) || part(state.installed[type]).type !== type) {
       state.installed[type] = type + '0';
     }
@@ -251,6 +256,7 @@
     if (!p) return { ok: false, msg: 'Компонент не найден.' };
     if (p.type === 'cpu') return { ok: false, msg: 'Для процессора открой «Мастерскую» и пройди замену.' };
     if (p.type === 'ssd') return { ok: false, msg: 'Чтобы поставить накопитель, пройди мини-игру «Монтаж SSD».' };
+    if (p.type === 'cooler') return { ok: false, msg: 'Для установки кулера открой «Охлаждение ПК».' };
     const check = compatibility(id);
     if (!check.ok) return check;
     return equip(id, p.type);
@@ -270,6 +276,16 @@
     const check = compatibility(id);
     if (!check.ok) return check;
     return equip(id, 'ssd');
+  };
+
+  G.installCoolerFromWorkshop = function (id) {
+    const p = part(id);
+    if (!p || p.type !== 'cooler' || p.socket !== G.installedPart('board').socket) {
+      return { ok: false, msg: 'Кулер несовместим с сокетом материнской платы.' };
+    }
+    const check = compatibility(id);
+    if (!check.ok) return check;
+    return equip(id, 'cooler');
   };
 
   G.performance = function () {
