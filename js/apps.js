@@ -1091,7 +1091,7 @@
           if (i < lvl) p.className = 'on';
           pips.appendChild(p);
         }
-        card.querySelector('.cost').textContent = maxed ? 'максимум' : fmt(cost) + ' ₡';
+        card.querySelector('.cost').textContent = maxed ? 'максимум' : (item.id === 'gpu' || item.id === 'ram' ? fmt(cost) + ' арк. кр.' : fmt(cost) + ' ₡');
         const btn = card.querySelector('button');
         btn.textContent = maxed ? 'Установлено' : 'Улучшить';
         btn.disabled = maxed;
