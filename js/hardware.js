@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const G = window.Game;
-  G.version = '1.4.0';
+  G.version = '1.5.0';
 
   const KEY = 'zarya.components.v2';
   const OLD_KEY = 'zarya.hardware.v1';
@@ -21,7 +21,21 @@
     { id: 'ram1', type: 'ram', name: '4 ГБ DDR4', price: 65, power: 1, detail: '1×4 ГБ · DDR4' },
     { id: 'ram2', type: 'ram', name: '8 ГБ DDR4', price: 145, power: 2, detail: '1×8 ГБ · DDR4' },
     { id: 'ram3', type: 'ram', name: '16 ГБ DDR4', price: 325, power: 3, detail: '2×8 ГБ · DDR4' },
-    { id: 'ram4', type: 'ram', name: '32 ГБ DDR4', price: 690, power: 4, detail: '2×16 ГБ · DDR4' }
+    { id: 'ram4', type: 'ram', name: '32 ГБ DDR4', price: 690, power: 4, detail: '2×16 ГБ · DDR4', capacity: 32 },
+    { id: 'board0', type: 'board', name: 'ASRock H410M-HDV', price: 0, power: 0, detail: 'LGA1200 · DDR4 · SATA', socket: 'LGA1200', m2: false, maxRam: 64 },
+    { id: 'board1', type: 'board', name: 'MSI B460M PRO-VDH WIFI', price: 260, power: 1, detail: 'LGA1200 · DDR4 · M.2 NVMe', socket: 'LGA1200', m2: true, maxRam: 128 },
+    { id: 'board2', type: 'board', name: 'ASUS TUF GAMING B560M-PLUS', price: 580, power: 2, detail: 'LGA1200 · DDR4 · M.2 NVMe', socket: 'LGA1200', m2: true, maxRam: 128 },
+    { id: 'board3', type: 'board', name: 'MSI MAG Z490 TOMAHAWK', price: 980, power: 3, detail: 'LGA1200 · DDR4 · два разъёма M.2', socket: 'LGA1200', m2: true, maxRam: 128 },
+    { id: 'psu0', type: 'psu', name: 'OEM 300W', price: 0, power: 0, detail: '300 Вт · стартовый блок', watts: 300 },
+    { id: 'psu1', type: 'psu', name: 'Corsair CV450', price: 155, power: 1, detail: '450 Вт · 80 PLUS Bronze', watts: 450 },
+    { id: 'psu2', type: 'psu', name: 'be quiet! System Power 10 550W', price: 340, power: 2, detail: '550 Вт · 80 PLUS Bronze', watts: 550 },
+    { id: 'psu3', type: 'psu', name: 'Corsair CX650', price: 610, power: 3, detail: '650 Вт · 80 PLUS Bronze', watts: 650 },
+    { id: 'psu4', type: 'psu', name: 'Seasonic FOCUS GX-750', price: 1050, power: 4, detail: '750 Вт · 80 PLUS Gold', watts: 750 },
+    { id: 'ssd0', type: 'ssd', name: 'WD Blue 500GB HDD', price: 0, power: 0, detail: 'Жёсткий диск · 500 ГБ · SATA', interface: 'SATA', mbps: 110 },
+    { id: 'ssd1', type: 'ssd', name: 'Kingston A400 480GB', price: 145, power: 1, detail: 'SSD · 480 ГБ · SATA', interface: 'SATA', mbps: 450 },
+    { id: 'ssd2', type: 'ssd', name: 'Samsung 870 EVO 1TB', price: 385, power: 2, detail: 'SSD · 1 ТБ · SATA', interface: 'SATA', mbps: 560 },
+    { id: 'ssd3', type: 'ssd', name: 'WD Blue SN570 1TB', price: 645, power: 3, detail: 'NVMe · 1 ТБ · M.2', interface: 'M.2', mbps: 3000 },
+    { id: 'ssd4', type: 'ssd', name: 'Samsung 970 EVO Plus 2TB', price: 1050, power: 4, detail: 'NVMe · 2 ТБ · M.2', interface: 'M.2', mbps: 3500 }
   ];
 
   const original = {
@@ -32,12 +46,12 @@
   };
 
   function part(id) { return PARTS.find(function (p) { return p.id === id; }) || null; }
-  function validType(type) { return type === 'cpu' || type === 'gpu' || type === 'ram'; }
+  function validType(type) { return ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd'].includes(type); }
   function clampLevel(level) { return Math.max(0, Math.min(4, Math.floor(Number(level) || 0))); }
   function fresh() {
     return {
       v: 2,
-      installed: { cpu: 'cpu0', gpu: 'gpu0', ram: 'ram0' },
+      installed: { cpu: 'cpu0', gpu: 'gpu0', ram: 'ram0', board: 'board0', psu: 'psu0', ssd: 'ssd0' },
       inventory: [],
       credits: 0,
       best: {},
@@ -69,7 +83,7 @@
   if (!state) state = migrate();
 
   // Не доверяем устаревшим, дублированным и случайно испорченным ID в сохранении.
-  ['cpu', 'gpu', 'ram'].forEach(function (type) {
+  ['cpu', 'gpu', 'ram', 'board', 'psu', 'ssd'].forEach(function (type) {
     if (!part(state.installed[type]) || part(state.installed[type]).type !== type) {
       state.installed[type] = type + '0';
     }
@@ -155,10 +169,59 @@
     return { ok: true, msg: 'Установлено: ' + p.name + '. Старая деталь возвращена в инвентарь.' };
   }
 
+  function powerNeeded(cpu, gpu) {
+    // Simulated whole-PC requirement, deliberately not an electrical engineering calculator.
+    const cpuWatts = [55, 65, 65, 65, 125][cpu.power] || 65;
+    const gpuWatts = [0, 30, 185, 125, 170][gpu.power] || 0;
+    return Math.ceil((85 + cpuWatts + gpuWatts) * 1.2);
+  }
+
+  function compatibility(id) {
+    const next = part(id);
+    if (!next) return { ok: false, msg: 'Комплектующее не найдено.' };
+    const chosen = Object.assign({}, state.installed, { [next.type]: id });
+    const board = part(chosen.board), cpu = part(chosen.cpu), ram = part(chosen.ram);
+    const gpu = part(chosen.gpu), psu = part(chosen.psu), ssd = part(chosen.ssd);
+    if (!board || !cpu || !ram || !gpu || !psu || !ssd) return { ok: false, msg: 'Не хватает данных о конфигурации.' };
+    if (cpu.socket !== board.socket) {
+      return { ok: false, msg: 'Несовместимый сокет: ' + cpu.socket + ' / ' + board.socket + '.' };
+    }
+    const ramGb = [2, 4, 8, 16, 32][ram.power] || 2;
+    if (ramGb > board.maxRam) return { ok: false, msg: 'Эта материнская плата не поддерживает ' + ramGb + ' ГБ памяти.' };
+    if (ssd.interface === 'M.2' && !board.m2) {
+      return { ok: false, msg: 'Нужен слот M.2. Купи и установи материнскую плату с M.2.' };
+    }
+    const required = powerNeeded(cpu, gpu);
+    if (psu.watts < required) {
+      return { ok: false, msg: 'Не хватает мощности блока питания: требуется ' + required + ' Вт, доступно ' + psu.watts + ' Вт.' };
+    }
+    return { ok: true, msg: 'Совместимо с установленным компьютером.' };
+  }
+  G.partCompatibility = compatibility;
+  G.systemHealth = function () {
+    const cpu = G.installedPart('cpu');
+    const gpu = G.installedPart('gpu');
+    const psu = G.installedPart('psu');
+    const drive = G.installedPart('ssd');
+    const need = powerNeeded(cpu, gpu);
+    return {
+      requiredWatts: need,
+      suppliedWatts: psu.watts,
+      spareWatts: psu.watts - need,
+      storageSpeed: drive.mbps,
+      bootSeconds: Math.max(5, Math.round(48 - 9 * drive.power - G.level('cpu') * 1.2)),
+      diskName: drive.name,
+      status: psu.watts >= need ? 'Система стабильна' : 'Питание недостаточно'
+    };
+  };
+
   G.installPart = function (id) {
     const p = part(id);
     if (!p) return { ok: false, msg: 'Компонент не найден.' };
     if (p.type === 'cpu') return { ok: false, msg: 'Для процессора открой «Мастерскую» и пройди замену.' };
+    if (p.type === 'ssd') return { ok: false, msg: 'Чтобы поставить накопитель, пройди мини-игру «Монтаж SSD».' };
+    const check = compatibility(id);
+    if (!check.ok) return check;
     return equip(id, p.type);
   };
   G.installCpuFromWorkbench = function (id) {
@@ -166,7 +229,16 @@
     if (!p || p.type !== 'cpu' || p.socket !== 'LGA1200') {
       return { ok: false, msg: 'Процессор несовместим с сокетом LGA1200.' };
     }
+    const check = compatibility(id);
+    if (!check.ok) return check;
     return equip(id, 'cpu');
+  };
+  G.installDriveFromWorkbench = function (id) {
+    const p = part(id);
+    if (!p || p.type !== 'ssd') return { ok: false, msg: 'Выбери накопитель из инвентаря.' };
+    const check = compatibility(id);
+    if (!check.ok) return check;
+    return equip(id, 'ssd');
   };
 
   G.performance = function () {
@@ -174,6 +246,8 @@
     const latency = Math.max(0, 150 - G.level('cpu') * 22 - G.level('ram') * 17);
     return {
       fps: fps,
+      bootSeconds: G.systemHealth().bootSeconds,
+      storageSpeed: G.systemHealth().storageSpeed,
       latency: latency,
       tier: fps < 35 ? 'Слабая конфигурация' : fps < 65 ? 'Средняя конфигурация' : 'Мощная конфигурация'
     };
