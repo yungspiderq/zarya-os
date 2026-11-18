@@ -326,7 +326,7 @@
       api = openApi;
       root = make(
         '<div class="app arcade-app">' +
-        ' <div class="app-head"><div><h2>Аркада</h2><p class="muted">Локальные мини-игры · зарабатывай аркадные кредиты на GPU и ОЗУ</p></div>' +
+        ' <div class="app-head"><div><h2>Аркада</h2><p class="muted">Локальные мини-игры · зарабатывай кредиты на комплектующие</p></div>' +
         ' <button type="button" class="btn" data-arcade="pc">Мой ПК</button></div>' +
         ' <div class="arcade-picker"><button type="button" data-game="snake">Пиксельная змейка</button>' +
         ' <button type="button" data-game="reaction">Тест реакции</button></div>' +

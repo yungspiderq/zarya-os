@@ -1,0 +1,36 @@
+name: Check component shop and CPU workbench
+
+on:
+  pull_request:
+    paths:
+      - 'js/**'
+      - 'css/**'
+      - 'index.html'
+      - 'tests/**'
+      - '.github/workflows/check-hardware.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'js/**'
+      - 'tests/**'
+      - '.github/workflows/check-hardware.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check JavaScript syntax
+        run: |
+          for file in js/*.js; do node --check "$file"; done
+      - name: Run virtual PC tests
+        run: node tests/hardware.test.cjs
+      - name: Check page integrations
+        run: |
+          node -e 'const fs=require("fs"); const x=fs.readFileSync("index.html","utf8"); for(const f of ["js/hardware.js","js/arcade.js","js/components.js","js/main.js","css/components.css"])if(!x.includes(f+"?v=1.4.0"))throw Error("Missing cache-safe asset: "+f)'
