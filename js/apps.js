@@ -46,6 +46,7 @@
       '  disconnect                отключиться от узла\n' +
       '  hide                      сбросить след (80 ₡)\n' +
       '  missions                  активные заказы\n' +
+      '  contracts                 побочные контракты\n' +
       '  shop / buy <id>           апгрейды и покупка\n' +
       '  money                     баланс\n' +
       '  whoami                    кто ты\n' +
@@ -104,7 +105,7 @@
       if (cmd === 'help') { print(HELP); return; }
       if (cmd === 'clear' || cmd === 'cls') { out.innerHTML = ''; return; }
       if (cmd === 'exit') { window.WM.close('terminal'); return; }
-      if (cmd === 'whoami') { print('root · ЗАРЯ OS 1.0 · репутация ' + G.rep() + ' · ' + fmt(G.money()) + ' ₡'); return; }
+      if (cmd === 'whoami') { print('root · ЗАРЯ OS ' + (window.Game.version || '1.1') + ' · репутация ' + G.rep() + ' · ' + fmt(G.money()) + ' ₡'); return; }
       if (cmd === 'money' || cmd === 'balance') { print('баланс: ' + fmt(G.money()) + ' ₡'); return; }
       if (cmd === 'net') {
         const list = G.servers();
@@ -120,6 +121,16 @@
         else act.forEach(function (m) {
           print('  [' + m.id + '] ' + m.subject + ' → ' + m.server + ' (' + m.goal.kind + ' ' + m.goal.file + ') · ' + m.reward + ' ₡');
         });
+        return;
+      }
+      if (cmd === 'contracts' || cmd === 'side') {
+        const side = G.missions().filter(function (m) { return m.side; });
+        print('побочные контракты (не блокируют сюжет):');
+        side.forEach(function (m) {
+          const mark = m.status === 'done' ? 'выполнен' : m.status === 'active' ? 'в работе' : 'доступен';
+          print('  [' + m.id + '] ' + m.subject.padEnd(24) + m.server.padEnd(16) + m.reward + ' ₡ · ' + mark);
+        });
+        print('  взять контракт: Почта → заказ → «Принять заказ»', 'dim');
         return;
       }
       if (cmd === 'scan') {
@@ -245,7 +256,7 @@
 
       api.body.appendChild(root);
 
-      print('ЗАРЯ OS · терминал 1.0', 'accent');
+      print('ЗАРЯ OS · терминал ' + (window.Game.version || '1.1'), 'accent');
       print('help — команды · net — карта сети · missions — заказы', 'dim');
       print('', 'dim');
 
@@ -499,12 +510,20 @@
         '    <div class="stat stat--trace"><span>След</span><b data-el="traceVal">0%</b>' +
         '      <div class="meter"><i data-el="trace"></i></div>' +
         '    </div>' +
+        '    <div class="stat stat--act"><span>Чистка маршрута</span>' +
+        '      <button type="button" class="btn btn--sm" data-act="hide">Сбросить след · 80 ₡</button>' +
+        '    </div>' +
         '  </div>' +
         '  <div class="net-note">Все узлы вымышленные. Сеть живёт только внутри игры.</div>' +
         '  <div class="net-grid" data-el="grid"></div>' +
         '</div>'
       );
       api.body.appendChild(root);
+      root.querySelector('[data-act="hide"]').addEventListener('click', function () {
+        const r = window.Game.hide();
+        window.UI.toast(r.msg, r.ok ? 'ok' : 'err');
+        render();
+      });
       render();
       window.addEventListener('zarya:game', render);
     }
@@ -949,7 +968,7 @@
         '        <button type="button" class="btn btn--danger" data-act="reset-game">Начать заново</button>' +
         '      </div>' +
         '    </section>' +
-        '    <p class="set-foot">ЗАРЯ OS 1.0 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
+        '    <p class="set-foot">ЗАРЯ OS 1.1 · всё вымышлено, все узлы и пароли — часть игры.</p>' +
         '  </div>' +
         '</div>'
       );
@@ -1003,7 +1022,7 @@
         '<div class="app about">' +
         '  <div class="about-head">' +
         '    <span class="about-logo">' + window.ICONS.start + '</span>' +
-        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.0 «Рассвет» · сборка 20261117</p></div>' +
+        '    <div><h2>ЗАРЯ OS</h2><p class="muted">версия 1.1 «Ночная смена» · сборка 20261118</p></div>' +
         '  </div>' +
         '  <div class="about-grid">' +
         '    <div><span>Процессор</span><b data-el="cpu">1 ядро</b></div>' +
