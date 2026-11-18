@@ -40,7 +40,7 @@ const initial=new Map([
   const json=JSON.parse(blob);
   assert.equal(json.format,'zarya-os-save');
   assert.equal(json.schema,1);
-  assert.equal(json.version,'2.2.0');
+  assert.equal(json.version,'2.2.1');
   assert.equal(Object.keys(json.data).length,6);
   assert.equal(json.data['not-zarya-account'],undefined,'unrelated storage cannot leak into export');
   assert.equal(json.data['zarya.seen'],'1','welcome state is included');
@@ -88,7 +88,7 @@ const initial=new Map([
   assert.equal(target.Core.restore(apparentlyValid).ok,true);
   assert.equal(JSON.parse(data.get('zarya.game.v1')).money,0,'forged money ignored on import');
   const gameOnly=target.Core.validate(JSON.stringify({
-    format:'zarya-os-save',schema:1,version:'2.2.0',data:{'zarya.game.v1':'{"v":1,"money":99999}'}
+    format:'zarya-os-save',schema:1,version:'2.2.1',data:{'zarya.game.v1':'{"v":1,"money":99999}'}
   }));
   assert.equal(gameOnly.ok,true);
   assert.equal(gameOnly.restorable,false);
